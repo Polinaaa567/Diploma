@@ -22,7 +22,7 @@ public class EventPsqlJPA implements IStorageEvent{
     @Override
     public List<Event> receiveEventss() {
 
-        List<EEvent> eEvents = entityManager.createQuery("SELECT p FROM EEvent p", EEvent.class).getResultList();
+        List<EEvent> eEvents = entityManager.createQuery("SELECT p FROM EEvent p order by p.dateEvent", EEvent.class).getResultList();
         
         List<Event> events = EventStructure.toEventList(eEvents);
 

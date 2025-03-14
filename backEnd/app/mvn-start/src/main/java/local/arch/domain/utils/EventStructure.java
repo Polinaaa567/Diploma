@@ -30,15 +30,12 @@ public class EventStructure {
         } else {
             event.setAgeRestrictions(0);
         }
-        event.setAgeRestrictions(eEvent.getAgeRestrictions());
 
         event.setDateCreation(eEvent.getDateCreation());
 
         event.setDescriptionEvent(eEvent.getDescriptionEvent());
 
         event.setEventFormat(eEvent.getEventFormat());
-
-        event.setDateCreation(eEvent.getDateCreation());
 
         event.setEventID(eEvent.getEventID());
 
@@ -55,8 +52,6 @@ public class EventStructure {
             event.setMaxNumberParticipants(0);
         }
         
-        // event.setMaxNumberParticipants(eEvent.getMaxNumberParticipants());
-
         event.setNameEvent(eEvent.getNameEvent());
 
         event.setNumberPointsEvent(eEvent.getNumberPointsEvent());
@@ -81,8 +76,6 @@ public class EventStructure {
             eE.setDescriptionEvent(e.getDescriptionEvent());
 
             eE.setEventFormat(e.getEventFormat());
-
-            eE.setDateCreation(e.getDateCreation());
 
             eE.setEventID(e.getEventID());
 

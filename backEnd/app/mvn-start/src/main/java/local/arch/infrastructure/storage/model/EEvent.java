@@ -25,7 +25,6 @@ public class EEvent {
     @Column(name = "\"event_id\"")
     private Integer eventID;
 
-    // обязательно = name_event description_event event_format time_event number_points_event date_creation
     @Column(name = "\"name_event\"")
     private String nameEvent;
 

@@ -5,8 +5,7 @@ WITH
     LC_CTYPE = 'ru-RU'
 ;
 
-
-\c volunteering_kems;
+\c volunteering_kemsu;
 
 SET CLIENT_ENCODING TO 'UTF8';
    
@@ -32,7 +31,7 @@ CREATE TABLE IF NOT EXISTS events
     date_creation timestamp with time zone NOT NULL,
     link_dobro_rf text COLLATE pg_catalog."default",
     image bytea,
-    date_event time with time zone NOT NULL,
+    date_event timestamp with time zone NOT NULL,
     CONSTRAINT events_pkey PRIMARY KEY (event_id)
 );
 
