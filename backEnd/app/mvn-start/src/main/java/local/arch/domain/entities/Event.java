@@ -2,9 +2,11 @@ package local.arch.domain.entities;
 
 import java.sql.Timestamp;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Event {
     private int eventID;
 
@@ -26,9 +28,9 @@ public class Event {
 
     private String eventType;
 
-    private String ageRestrictions;
+    private Integer ageRestrictions;
 
-    private String numberPointsEvent;
+    private Integer numberPointsEvent;
 
     private String stateEvent;
 
@@ -36,5 +38,5 @@ public class Event {
 
     private String linkDobroRF;
 
-    private Byte imageEvent;
+    private byte[] image;
 }

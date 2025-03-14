@@ -7,13 +7,13 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import local.arch.apllication.service.user_service.IUserService;
-import local.arch.infrastructure.builder.Built;
+import local.arch.infrastructure.builder.BuiltUser;
 
 @Path("/rating")
 public class Rating {
-    @Inject
-    @Built
-    IUserService userService;
+    // @Inject
+    // @BuiltUser
+    // IUserService userService;
         
     @GET
     @Produces("application/json")
@@ -23,7 +23,7 @@ public class Rating {
 
         // имя, фамилия, кол-во баллов или уровень
 
-        String msg = userService.receiveUserRating();
+        // String msg = userService.receiveUserRating();
         
         return Response.ok("").build();
     }

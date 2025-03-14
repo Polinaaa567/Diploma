@@ -13,11 +13,14 @@ public class NewsC {
     @Produces("application/json")
     public Response getListAllNews() {
        
+       
+        return Response.ok("").build();
+            
+        
         // список новостей организации
 
         // ждёт: картинка, название, дата размещения
 
-        return Response.ok("").build();
     }
 
     @GET

@@ -23,6 +23,17 @@ public class EducationAdmin {
     
         // добавить урок
 
+
+
+
+        // открыть и сохранитьь 
+        // расчёт данные и график, исследование (параметров)
+        // график гиста, круговая и гиста
+        // о программе модальное окно кто разраб и год какой и лаба
+
+
+
+        
         Lesson lessonData = jsonb.fromJson(lessonDataJSON, Lesson.class);
         
         return Response.ok(lessonData.getHeadline()).build();

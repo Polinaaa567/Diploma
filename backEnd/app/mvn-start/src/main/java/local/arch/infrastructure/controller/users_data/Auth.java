@@ -7,14 +7,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import local.arch.apllication.service.user_service.IUserService;
-import local.arch.infrastructure.builder.Built;
+import local.arch.infrastructure.builder.BuiltUser;
 
 @Path("/auth")
 public class Auth {
 
-    @Inject
-    @Built
-    IUserService userService;
+    // @Inject
+    // @BuiltUser
+    // IUserService userService;
     
     @POST
     @Produces("application/json")
@@ -23,9 +23,9 @@ public class Auth {
         
         // регистрация
 
-        String message = userService.registrationUser(userInfoRegJSON);
+        // String message = userService.registrationUser(userInfoRegJSON);
 
-        return Response.ok(message).build();
+        return Response.ok("message").build();
     }
 
 
@@ -35,9 +35,9 @@ public class Auth {
     public Response logInToSystem(String userInfoRegJSON) {
        
         // вход в систему
-        String message = userService.loginUser(userInfoRegJSON);
+        // String message = userService.loginUser(userInfoRegJSON);
        
-        return Response.ok(message).build();
+        return Response.ok("message").build();
     } 
 
     @PUT
@@ -48,9 +48,9 @@ public class Auth {
         // изменить пароль в бд
 
         try {
-            String message = userService.changeUserPasswd(userInfoRegJSON);
+            // String message = userService.changeUserPasswd(userInfoRegJSON);
 
-            return Response.ok(message).build();
+            return Response.ok("message").build();
             
         } catch (Exception e) {
             return Response.ok("Ошибка" + e).build();

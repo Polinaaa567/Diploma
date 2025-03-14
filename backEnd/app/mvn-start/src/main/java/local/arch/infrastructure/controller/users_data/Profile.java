@@ -9,13 +9,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
 import local.arch.apllication.service.user_service.IUserService;
-import local.arch.infrastructure.builder.Built;
+import local.arch.infrastructure.builder.BuiltUser;
 
 @Path("/profile/users")
 public class Profile{
-    @Inject
-    @Built
-    IUserService userService;
+    // @Inject
+    // @BuiltUser
+    // IUserService userService;
     
     @GET
     @Produces("application/json")
@@ -23,7 +23,7 @@ public class Profile{
     public Response getInfoAboutUsers(@PathParam("userID") int userID) {
         
         // Получить данные о пользователе
-        String msg = userService.receiveUserData(userID);
+        // String msg = userService.receiveUserData(userID);
 
         return Response.ok("check").build();
     }
@@ -33,7 +33,7 @@ public class Profile{
     public Response changeDataAboutUsers(String userDataJSON) {
         
         // Изменить данные о пользователе
-        String msg = userService.updateUserData(userDataJSON);
+        // String msg = userService.updateUserData(userDataJSON);
 
         return Response.ok("check").build();
     }

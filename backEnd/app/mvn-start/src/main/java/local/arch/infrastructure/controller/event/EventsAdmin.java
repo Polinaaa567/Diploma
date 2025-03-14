@@ -1,4 +1,4 @@
-package local.arch.infrastructure.controller.events;
+package local.arch.infrastructure.controller.event;
 
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;

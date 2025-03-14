@@ -1,5 +1,8 @@
-package local.arch.infrastructure.controller.events;
+package local.arch.infrastructure.controller.event;
 
+import java.util.List;
+
+import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.DELETE;
@@ -9,12 +12,20 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+import local.arch.apllication.interfaces.IEventsService;
+import local.arch.domain.entities.Event;
 import local.arch.domain.entities.UserEvent;
+import local.arch.infrastructure.builder.BuiltEvent;
+import local.arch.infrastructure.storage.model.EEvent;
 
 @Path("/events")
 public class Events {
     
     private Jsonb jsonb = JsonbBuilder.create();
+
+    @Inject
+    @BuiltEvent 
+    IEventsService eventsService;
 
     @GET
     @Produces("application/json")
@@ -24,7 +35,9 @@ public class Events {
         
         // ждёт: дата когда будет, название и краткое описание
 
-        return Response.ok("check all events").build();
+        List<Event> ev = eventsService.receiveEvents();
+        
+        return Response.ok(ev).build();
     }
     
     @GET
