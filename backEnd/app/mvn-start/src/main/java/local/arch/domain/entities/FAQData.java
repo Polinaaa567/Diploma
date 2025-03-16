@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FAQData {
-    private int faqID;
+    private Integer faqID;
 
     private String question;
 

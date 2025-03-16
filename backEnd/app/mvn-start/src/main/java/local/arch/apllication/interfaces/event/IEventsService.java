@@ -1,4 +1,4 @@
-package local.arch.apllication.interfaces;
+package local.arch.apllication.interfaces.event;
 
 import java.util.List;
 

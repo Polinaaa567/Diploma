@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserEvent {
-    private String userID;
+    private Integer userID;
    
-    private String eventID;
+    private Integer eventID;
 }

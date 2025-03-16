@@ -12,7 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
-import local.arch.apllication.interfaces.IEventsService;
+import local.arch.apllication.interfaces.event.IEventsService;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.UserEvent;
 import local.arch.infrastructure.builder.BuiltEvent;

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Event {
-    private int eventID;
+    private Integer eventID;
 
     private String nameEvent;
 
@@ -22,9 +22,9 @@ public class Event {
 
     private String timeEvent;
 
-    private int numberParticipants;
+    private Integer numberParticipants;
 
-    private int maxNumberParticipants;
+    private Integer maxNumberParticipants;
 
     private String eventType;
 

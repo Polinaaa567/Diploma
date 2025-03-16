@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-    private int idUser;
+    private Integer idUser;
     
     private String lastName;
     
@@ -26,13 +26,13 @@ public class User {
     
     private boolean ageStamp;
     
-    private int roleID;
+    private Integer roleID;
     
     private Timestamp dateCreation; 
 
     private Byte photo_certificate_data; 
 
-    private int points;
+    private Integer points;
 
-    private int levelNumber;
+    private Integer levelNumber;
 }

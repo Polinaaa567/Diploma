@@ -63,4 +63,14 @@ public class EEvent {
 
     @Column(name = "\"date_event\"")
     private Timestamp dateEvent;
+
+    public EEvent() {}
+
+    public EEvent(Integer eventID, String nameEvent, String descriptionEvent, String addressEvent, byte[] image) {
+        this.eventID = eventID;
+        this.nameEvent = nameEvent;
+        this.descriptionEvent = descriptionEvent;
+        this.addressEvent = addressEvent;
+        this.image = image;
+    }
 }

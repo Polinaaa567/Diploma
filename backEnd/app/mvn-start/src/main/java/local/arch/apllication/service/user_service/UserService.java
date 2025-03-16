@@ -1,53 +1,58 @@
 package local.arch.apllication.service.user_service;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import java.util.List;
 
+import local.arch.apllication.interfaces.user.IStorageUser;
+import local.arch.apllication.interfaces.user.IStorageUserUsing;
+import local.arch.apllication.interfaces.user.IUserService;
 import local.arch.domain.entities.User;
 
-public class UserService implements IUserService {
-    private Jsonb jsonb = JsonbBuilder.create();
+public class UserService implements IUserService, IStorageUserUsing {
+
+    IStorageUser storageUser;
 
     @Override
-    public String registrationUser(String userInfoRegJSON) {
-        User userData = jsonb.fromJson(userInfoRegJSON, User.class);
-
-        return userData.getEmail();
-    }
-
-    @Override
-    public String loginUser(String userInfoRegJSON) {
-        User userData = jsonb.fromJson(userInfoRegJSON, User.class);
-
-        return jsonb.toJson(userData);
-    }
-
-    @Override
-    public String changeUserPasswd(String userInfoLoginJSON) {
-        User userData = jsonb.fromJson(userInfoLoginJSON, User.class);
-        
+    public List<User> receiveUserRating() {
         return null;
     }
 
     @Override
-    public String updateUserData(String userInfoJSON) {
-        User userData = jsonb.fromJson(userInfoJSON, User.class);
-
-        return "null";
+    public String loginUser(User user) {
+        return storageUser.loginUser(user);
     }
 
     @Override
-    public String receiveUserData(int userID) {
-        return null;
+    public boolean findUser(User user) {
+        throw new UnsupportedOperationException("Unimplemented method 'findUser'");
     }
 
     @Override
-    public String receiveCertificate(int userID) {
-        return null;
+    public String changeUserPasswd(User user) {
+        throw new UnsupportedOperationException("Unimplemented method 'changeUserPasswd'");
     }
 
     @Override
-    public String receiveUserRating() {
-        return null;
+    public User updateUserData(User user) {
+        throw new UnsupportedOperationException("Unimplemented method 'updateUserData'");
+    }
+
+    @Override
+    public User receiveUserData(Integer idUser, User user) {
+        throw new UnsupportedOperationException("Unimplemented method 'receiveUserData'");
+    }
+
+    @Override
+    public List<User> receiveCertificate(Integer userID) {
+        throw new UnsupportedOperationException("Unimplemented method 'receiveCertificate'");
+    }
+
+    @Override
+    public String registrationUser(User user) {
+        return storageUser.registrationUser(user);
+    }
+
+    @Override
+    public void useStorage(IStorageUser storageUser) {
+        this.storageUser = storageUser;
     }
 }

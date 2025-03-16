@@ -2,13 +2,12 @@ package local.arch.apllication.service.event_service;
 
 import java.util.List;
 
-import local.arch.apllication.interfaces.IEventsService;
-import local.arch.apllication.interfaces.IStorageEvent;
-import local.arch.apllication.interfaces.IStorageEventUsing;
+import local.arch.apllication.interfaces.event.IEventsService;
+import local.arch.apllication.interfaces.event.IStorageEvent;
+import local.arch.apllication.interfaces.event.IStorageEventUsing;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.User;
 import local.arch.domain.entities.UserEvent;
-import local.arch.infrastructure.storage.model.EEvent;
 
 public class EventsService implements IEventsService, IStorageEventUsing {
 
@@ -16,7 +15,7 @@ public class EventsService implements IEventsService, IStorageEventUsing {
 
     @Override
     public List<Event> receiveEvents() {
-        List <Event> ev = storageEvent.receiveEventss();
+        List <Event> ev = storageEvent.receiveEvents();
         return ev;
     }
 
