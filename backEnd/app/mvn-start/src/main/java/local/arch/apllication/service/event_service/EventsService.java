@@ -15,32 +15,33 @@ public class EventsService implements IEventsService, IStorageEventUsing {
 
     @Override
     public List<Event> receiveEvents() {
-        List <Event> ev = storageEvent.receiveEvents();
-        return ev;
+        return storageEvent.receiveEvents();
     }
 
     @Override
-    public List<Event> receiveEventsUser(Integer userID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveEventsUser'");
+    public List<Event> receivePastEventsUser(Integer userID) {
+        return storageEvent.receivePastEventsUser(userID);
     }
 
     @Override
-    public Event receiveEventInfo(Integer eventID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveEventInfo'");
+    public List<Event> receiveFutureEventsUser(Integer userID) {
+        return storageEvent.receiveFutureEventsUser(userID);
+
     }
 
     @Override
-    public Boolean signUpForEvent(UserEvent data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'signUpForEvent'");
+    public Event receiveEventInfo(UserEvent userEvent) {
+        return storageEvent.receiveEventInfo(userEvent);
     }
 
     @Override
-    public Boolean deleteUsersEvent(UserEvent data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteUsersEvent'");
+    public String signUpForEvent(UserEvent userEvent) {
+        return storageEvent.signUpForEvent(userEvent);
+    }
+
+    @Override
+    public String deleteUsersEvent(UserEvent userEvent) {
+        return storageEvent.deleteUsersEvent(userEvent);
     }
 
     @Override
@@ -69,5 +70,5 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     public void useStorage(IStorageEvent storageEvent) {
         this.storageEvent = storageEvent;
     }
-    
+
 }

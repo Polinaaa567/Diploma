@@ -38,5 +38,4 @@ public class BuilderData {
         ((IStorageUserUsing) userService).useStorage(storageUser);
         return userService;
     }
-
 }

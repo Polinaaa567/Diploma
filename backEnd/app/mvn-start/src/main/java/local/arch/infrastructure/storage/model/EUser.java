@@ -2,14 +2,14 @@ package local.arch.infrastructure.storage.model;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -36,12 +36,9 @@ public class EUser {
 
     @Column(name = "\"patronymic\"")
     private String patronymic;
-
-    @Column(name = "\"number_phone\"")
-    private String numberPhone;
     
-    @Column(name = "\"email\"")
-    private String email;
+    @Column(name = "\"login\"")
+    private String login;
     
     @Column(name = "\"password\"")
     private String password;
@@ -50,12 +47,13 @@ public class EUser {
     private String clothingSize;
     
     @Column(name = "\"age_stamp\"")
-    private boolean ageStamp;
+    private Boolean ageStamp;
     
     @OneToOne
     @JoinColumn(name = "\"fk_role_id\"", referencedColumnName = "\"id_role\"")
     private ERole fkRoleID;
 
     @Column(name = "\"date_creation\"")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm:ss")
     private Timestamp dateCreation;
 }

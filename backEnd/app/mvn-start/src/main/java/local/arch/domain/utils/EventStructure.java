@@ -56,11 +56,7 @@ public class EventStructure {
 
         event.setNumberPointsEvent(eEvent.getNumberPointsEvent());
 
-        event.setTimeEvent(eEvent.getTimeEvent());
-
-        event.setDateEvent(eEvent.getDateEvent());
-
-        return event;
+       return event;
 
     }
 
@@ -90,10 +86,6 @@ public class EventStructure {
             eE.setNameEvent(e.getNameEvent());
 
             eE.setNumberPointsEvent(e.getNumberPointsEvent());
-
-            eE.setTimeEvent(e.getTimeEvent());
-
-            eE.setDateEvent(e.getDateEvent());
 
             return eE;
         } catch (Exception error) {

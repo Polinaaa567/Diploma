@@ -31,9 +31,11 @@ public class NewsAdmin {
     @DELETE
     @Produces("application/json")
     @Path("/{newsID}")
-    public void deleteNews(@PathParam("newsID") Integer newsID) {
+    public  Response deleteNews(@PathParam("newsID") Integer newsID) {
 
         // удалить новость
+
+        return Response.ok("").build();
 
     }
 }

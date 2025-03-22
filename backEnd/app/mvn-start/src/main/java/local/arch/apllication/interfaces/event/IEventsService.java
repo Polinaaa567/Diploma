@@ -5,18 +5,19 @@ import java.util.List;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.User;
 import local.arch.domain.entities.UserEvent;
-import local.arch.infrastructure.storage.model.EEvent;
 
 public interface IEventsService {
     public List<Event> receiveEvents();
 
-    public List<Event> receiveEventsUser(Integer userID);
+    public List<Event> receivePastEventsUser(Integer userID);
 
-    public Event receiveEventInfo(Integer eventID);
+    public List<Event> receiveFutureEventsUser(Integer userID);
 
-    public Boolean signUpForEvent(UserEvent data);
+    public Event receiveEventInfo(UserEvent userEvent);
 
-    public Boolean deleteUsersEvent(UserEvent data);
+    public String signUpForEvent(UserEvent data);
+
+    public String deleteUsersEvent(UserEvent data);
 
     public Boolean addEvent(Event data);
 

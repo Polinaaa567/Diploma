@@ -1,4 +1,4 @@
--- CREATE DATABASE IF NOT EXISTS volunteering_kemsu
+-- CREATE DATABASE  volunteering_kems
 -- WITH
 --     ENCODING = 'UTF8'
 --     LC_COLLATE = 'ru-RU'
@@ -64,56 +64,102 @@ SET CLIENT_ENCODING TO 'UTF8';
 -- );
 
 
--- -----------------------------------------------------------------
+-- CREATE SEQUENCE IF NOT EXISTS roles_id_role_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
 
-CREATE SEQUENCE IF NOT EXISTS roles_id_role_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
+-- CREATE TABLE IF NOT EXISTS roles
+-- (
+--     id_role integer NOT NULL DEFAULT nextval('roles_id_role_seq'::regclass),
+--     name_roles text COLLATE pg_catalog."default" NOT NULL,
+--     CONSTRAINT roles_pkey PRIMARY KEY (id_role)
+-- );
 
-CREATE TABLE IF NOT EXISTS roles
-(
-    id_role integer NOT NULL DEFAULT nextval('roles_id_role_seq'::regclass),
-    name_roles text COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT roles_pkey PRIMARY KEY (id_role)
-)
+-- insert into roles (name_roles) values
+-- ('Администратор');
 
-insert into roles (name_roles) values
-('Администратор');
-
-insert into roles (name_roles) values
-('Пользователь');
+-- insert into roles (name_roles) values
+-- ('Пользователь');
 
 
 -- ------------------------------
 
-CREATE SEQUENCE IF NOT EXISTS users_id_user_seq
+-- CREATE SEQUENCE IF NOT EXISTS users_id_user_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS users
+-- (
+--     id_user integer NOT NULL DEFAULT nextval('users_id_user_seq'::regclass),
+--     last_name text COLLATE pg_catalog."default",
+--     first_name text COLLATE pg_catalog."default",
+--     patronymic text COLLATE pg_catalog."default",
+--     number_phone text COLLATE pg_catalog."default",
+--     email text COLLATE pg_catalog."default",
+--     password text COLLATE pg_catalog."default" NOT NULL,
+--     clothing_size text COLLATE pg_catalog."default",
+--     age_stamp boolean,
+--     fk_role_id integer NOT NULL,
+--     date_creation timestamp with time zone NOT NULL,
+--     CONSTRAINT users_pkey PRIMARY KEY (id_user),
+--     CONSTRAINT users_fk_role_id_fkey FOREIGN KEY (fk_role_id)
+--         REFERENCES roles (id_role) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE NO ACTION
+--         NOT VALID
+-- );
+
+
+CREATE SEQUENCE IF NOT EXISTS users_events_user_event_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS users
+
+CREATE TABLE IF NOT EXISTS users_events
 (
-    id_user integer NOT NULL DEFAULT nextval('users_id_user_seq'::regclass),
-    last_name text COLLATE pg_catalog."default",
-    first_name text COLLATE pg_catalog."default",
-    patronymic text COLLATE pg_catalog."default",
-    number_phone text COLLATE pg_catalog."default",
-    email text COLLATE pg_catalog."default",
-    password text COLLATE pg_catalog."default" NOT NULL,
-    clothing_size text COLLATE pg_catalog."default",
-    age_stamp boolean,
-    fk_role_id integer NOT NULL,
+    user_event_id integer NOT NULL DEFAULT nextval('users_events_user_event_id_seq'::regclass),
+    fk_user_id integer NOT NULL,
+    fk_event_id integer NOT NULL,
     date_creation timestamp with time zone NOT NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (id_user),
-    CONSTRAINT users_fk_role_id_fkey FOREIGN KEY (fk_role_id)
-        REFERENCES roles (id_role) MATCH SIMPLE
+    stamp_participate boolean,
+    time_participate double precision,
+    CONSTRAINT users_events_pkey PRIMARY KEY (user_event_id),
+    CONSTRAINT users_events_fk_event_id_fkey FOREIGN KEY (fk_event_id)
+        REFERENCES public.events (event_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT users_events_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+        REFERENCES public.users (id_user) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-)
+);
+
+ALTER TABLE events 
+DROP COLUMN time_event;
+
+insert into events (name_event, description_event, event_format, number_points_event, date_creation, date_event) values 
+	('Субботник для концерта крида', 'Драка за места у ног егорки. Кто выжил - тот и выиграл. Драться можно всем чем угодно: грабли, лопаты, метёлки, дети, старики. Да начнуться же голодные игры. Удачи, если же она вам понадобиться',
+'очно', 45, '2003-04-10', '16-04-2025 15:40:00'
+);
+
+ALTER TABLE users 
+DROP COLUMN number_phone;
+
+ALTER TABLE users RENAME COLUMN email TO login;
+
+
+-- INSERT INTO users_events(
+-- 	fk_user_id, fk_event_id, date_creation, stamp_participate, time_participate)
+-- 	VALUES (?, ?, ?, ?, ?);
 

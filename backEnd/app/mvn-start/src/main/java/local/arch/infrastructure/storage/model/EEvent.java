@@ -1,7 +1,9 @@
 package local.arch.infrastructure.storage.model;
 
-
 import java.sql.Timestamp;
+import java.util.Calendar;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,9 +40,6 @@ public class EEvent {
     @Column(name = "\"event_format\"")
     private String eventFormat;
 
-    @Column(name = "\"time_event\"")
-    private String timeEvent;
-
     @Column(name = "\"max_number_participants\"")
     private Integer maxNumberParticipants;
 
@@ -53,6 +53,7 @@ public class EEvent {
     private Integer numberPointsEvent;
 
     @Column(name = "\"date_creation\"")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy' 'HH:mm:ss")
     private Timestamp dateCreation;
 
     @Column(name = "\"link_dobro_rf\"")
@@ -61,16 +62,10 @@ public class EEvent {
     @Column(name = "\"image\"")
     private byte[] image;
 
-    @Column(name = "\"date_event\"")
-    private Timestamp dateEvent;
+    @Column(name = "\"date_event\"", nullable=true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar dateEvent;
 
-    public EEvent() {}
-
-    public EEvent(Integer eventID, String nameEvent, String descriptionEvent, String addressEvent, byte[] image) {
-        this.eventID = eventID;
-        this.nameEvent = nameEvent;
-        this.descriptionEvent = descriptionEvent;
-        this.addressEvent = addressEvent;
-        this.image = image;
+    public EEvent() {
     }
 }

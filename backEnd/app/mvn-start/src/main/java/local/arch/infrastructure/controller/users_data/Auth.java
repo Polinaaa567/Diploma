@@ -20,37 +20,36 @@ public class Auth {
     @Inject
     @BuiltUser
     IUserService userService;
-    
+
     @POST
     @Produces("application/json")
-    @Path("/register") 
+    @Path("/register")
     public Response registration(String userInfoRegJSON) {
-        
+
         User user = jsonb.fromJson(userInfoRegJSON, User.class);
 
         return Response.ok(userService.registrationUser(user)).build();
     }
 
-
     @POST
     @Produces("application/json")
     @Path("/login")
     public Response logInToSystem(String userInfoRegJSON) {
-       
+
         User user = jsonb.fromJson(userInfoRegJSON, User.class);
-       
+
         return Response.ok(userService.loginUser(user)).build();
-    } 
+    }
 
     @PUT
     @Produces("application/json")
-    @Path("/password/reset") 
+    @Path("/password/reset")
     public Response resetPassword(String userInfoRegJSON) {
-        
+
         // изменить пароль в бд
         User user = jsonb.fromJson(userInfoRegJSON, User.class);
 
-        if(user.getPassword() == null) {
+        if (user.getPassword() == null) {
             return Response.ok(userService.findUser(user)).build();
         } else {
             return Response.ok(userService.changeUserPasswd(user)).build();

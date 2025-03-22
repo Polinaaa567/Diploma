@@ -1,6 +1,7 @@
 package local.arch.domain.entities;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,7 @@ public class Event {
 
     private String descriptionEvent;
 
-    private Timestamp dateEvent;
+    private String dateEvent;
 
     private String addressEvent;
 
@@ -39,4 +40,10 @@ public class Event {
     private String linkDobroRF;
 
     private byte[] image;
+
+    private Boolean stampParticipate;
+
+    private Double timeParticipate;
+
+    private Boolean statusParticipate;
 }

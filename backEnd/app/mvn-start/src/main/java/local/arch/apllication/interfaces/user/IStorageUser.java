@@ -12,7 +12,6 @@ public interface IStorageUser {
     public boolean findUser(User user);
 
     public String changeUserPasswd(User user);
-
     
     public User updateUserData(User user);
 

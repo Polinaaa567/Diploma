@@ -1,5 +1,8 @@
 package local.arch.infrastructure.storage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,31 +53,25 @@ public class UserPsqlJPA implements IStorageUser {
     @Transactional
     public String registrationUser(User user) {
 
-        String queryString = user.getEmail() != null
-                ? "SELECT p FROM EUser p WHERE p.email =:email"
-                : "SELECT p FROM EUser p WHERE p.number_phone =:numberPhone";
+        String queryString = "SELECT p FROM EUser p WHERE p.login = :login";
 
         TypedQuery<EUser> query = entityManager.createQuery(queryString, EUser.class);
-        if (user.getEmail() != null) {
-            query.setParameter("email", user.getEmail());
-        } else {
-            query.setParameter("numberPhone", user.getNumberPhone());
-        }
+
+        query.setParameter("login", user.getLogin());
 
         try {
             EUser person = query.getSingleResult();
             if (person != null) {
-                return "false";
+                return "{\n \"status\": false, \n\"message\": \"Пользователь с таким login уже существует\" \n}";
             }
         } catch (NoResultException e) {
             EUser newUser = new EUser();
             ERole role = entityManager
-                    .createQuery("SELECT r FROM ERole r WHERE r.nameRoles =:nameRoles", ERole.class)
+                    .createQuery("SELECT r FROM ERole r WHERE r.nameRoles = :nameRoles", ERole.class)
                     .setParameter("nameRoles", "Пользователь")
                     .getSingleResult();
 
-            newUser.setEmail(user.getEmail());
-            newUser.setNumberPhone(user.getNumberPhone());
+            newUser.setLogin(user.getLogin());
 
             String bcryptHashString = BCrypt.withDefaults().hashToString(14, user.getPassword().toCharArray());
             newUser.setPassword(bcryptHashString);
@@ -86,34 +83,31 @@ public class UserPsqlJPA implements IStorageUser {
             newUser.setDateCreation(timestamp);
             entityManager.persist(newUser);
 
-            return "" + newUser.getIdUser();
+            return "{ \n \"status\": true,\n\"message\":\"Регистрация прошла успешно\", \n\"id\": "
+                    + newUser.getIdUser() + "\n}";
         }
-        return "false";
+        return "{\n\"status\": false, \"message\": \"Произошла ошибка при регистрации\"\n}";
     }
 
     @Override
     public String loginUser(User user) {
-        String queryString = user.getEmail() != null
-                ? "SELECT p FROM EUser p WHERE p.email =:email"
-                : "SELECT p FROM EUser p WHERE p.number_phone =:numberPhone";
+        String queryString = "SELECT p FROM EUser p WHERE p.login = :login";
 
         TypedQuery<EUser> query = entityManager.createQuery(queryString, EUser.class);
-        if (user.getEmail() != null) {
-            query.setParameter("email", user.getEmail());
-        } else {
-            query.setParameter("numberPhone", user.getNumberPhone());
-        }
+        query.setParameter("login", user.getLogin());
 
         try {
             EUser existingUser = query.getSingleResult();
 
             if (BCrypt.verifyer().verify(user.getPassword().toCharArray(), existingUser.getPassword()).verified) {
-                return "" + existingUser.getIdUser();
+                return "{ \n \"status\": true, \n\"message\": \"Успешный вход\",\n\"id\": " + existingUser.getIdUser()
+                        + ",\n\"nameRole\": \""
+                        + existingUser.getFkRoleID().getNameRoles() + "\" \n}";
             } else {
-                return "Неверный номер телефона/почта или пароль";
+                return "{ \n\"status\": false, \n\"message\": \"Неверный логин или пароль\" \n}";
             }
         } catch (NoResultException e) {
-            return "Пользователь не найден";
+            return "{ \n \"status\": false, \n\"message\": \"Неверный логин или пароль\" \n}";
         }
     }
 

@@ -16,9 +16,7 @@ public class User {
     
     private String patronymic;
     
-    private String numberPhone;
-    
-    private String email;
+    private String login;
     
     private String password;
     
