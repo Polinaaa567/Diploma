@@ -1,10 +1,10 @@
-package local.arch.apllication.service.user_service;
+package local.arch.application.service.user_service;
 
 import java.util.List;
 
-import local.arch.apllication.interfaces.user.IStorageUser;
-import local.arch.apllication.interfaces.user.IStorageUserUsing;
-import local.arch.apllication.interfaces.user.IUserService;
+import local.arch.application.interfaces.user.IStorageUser;
+import local.arch.application.interfaces.user.IStorageUserUsing;
+import local.arch.application.interfaces.user.IUserService;
 import local.arch.domain.entities.User;
 
 public class UserService implements IUserService, IStorageUserUsing {
@@ -23,27 +23,27 @@ public class UserService implements IUserService, IStorageUserUsing {
 
     @Override
     public boolean findUser(User user) {
-        throw new UnsupportedOperationException("Unimplemented method 'findUser'");
+        return storageUser.findUser(user);
     }
 
     @Override
     public String changeUserPasswd(User user) {
-        throw new UnsupportedOperationException("Unimplemented method 'changeUserPasswd'");
+        return storageUser.changeUserPasswd(user);
     }
 
     @Override
-    public User updateUserData(User user) {
-        throw new UnsupportedOperationException("Unimplemented method 'updateUserData'");
+    public void updateUserData(User user) {
+        storageUser.updateUserData(user);
     }
 
     @Override
-    public User receiveUserData(Integer idUser, User user) {
-        throw new UnsupportedOperationException("Unimplemented method 'receiveUserData'");
+    public User receiveUserData(Integer idUser ) {
+        return storageUser.receiveUserData(idUser);
     }
 
     @Override
     public List<User> receiveCertificate(Integer userID) {
-        throw new UnsupportedOperationException("Unimplemented method 'receiveCertificate'");
+        return storageUser.receiveCertificate(userID);
     }
 
     @Override

@@ -8,7 +8,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
-import local.arch.apllication.interfaces.user.IUserService;
+import local.arch.application.interfaces.user.IUserService;
 import local.arch.domain.entities.User;
 import local.arch.infrastructure.builder.BuiltUser;
 
@@ -21,6 +21,7 @@ public class Auth {
     @BuiltUser
     IUserService userService;
 
+    // +
     @POST
     @Produces("application/json")
     @Path("/register")
@@ -31,6 +32,7 @@ public class Auth {
         return Response.ok(userService.registrationUser(user)).build();
     }
 
+    // +
     @POST
     @Produces("application/json")
     @Path("/login")
@@ -41,12 +43,14 @@ public class Auth {
         return Response.ok(userService.loginUser(user)).build();
     }
 
+    // -
     @PUT
     @Produces("application/json")
     @Path("/password/reset")
     public Response resetPassword(String userInfoRegJSON) {
 
         // изменить пароль в бд
+        
         User user = jsonb.fromJson(userInfoRegJSON, User.class);
 
         if (user.getPassword() == null) {

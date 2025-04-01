@@ -1,17 +1,21 @@
 package local.arch.infrastructure.storage;
 
+import java.util.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import local.arch.apllication.interfaces.event.IStorageEvent;
+import local.arch.application.interfaces.event.IStorageEvent;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.User;
 import local.arch.infrastructure.storage.model.EUser;
@@ -22,8 +26,7 @@ import local.arch.infrastructure.storage.model.EUserEvent;
 @Named
 public class EventPsqlJPA implements IStorageEvent {
 
-    LocalDateTime localDateTime = LocalDateTime.now();
-    Timestamp timestamp = Timestamp.valueOf(localDateTime);
+    Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
 
     public String formatDate(Calendar date) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -132,9 +135,12 @@ public class EventPsqlJPA implements IStorageEvent {
         event.setDateEvent(formatDate((Calendar) events.getDateEvent()));
         event.setNameEvent(events.getNameEvent());
         event.setDescriptionEvent(events.getDescriptionEvent());
-        event.setImage(event.getImage());
+        event.setImage(events.getImage());
 
-        if (userEvent.getUserID() != null) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(Date.from(timestamp.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
+
+        if (userEvent.getUserID() != null && events.getDateEvent().compareTo(calendar) > 0) {
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
             Boolean existEventUser = entityManager.createQuery(
@@ -160,12 +166,13 @@ public class EventPsqlJPA implements IStorageEvent {
         }
 
         event.setAddressEvent(events.getAddressEvent());
-        event.setEventFormat(event.getEventFormat());
-        event.setMaxNumberParticipants(event.getMaxNumberParticipants());
-        event.setEventType(event.getEventType());
-        event.setAgeRestrictions(event.getAgeRestrictions());
-        event.setNumberPointsEvent(event.getNumberPointsEvent());
+        event.setEventFormat(events.getEventFormat());
+        event.setMaxNumberParticipants(events.getMaxNumberParticipants());
+        event.setEventType(events.getEventType());
+        event.setAgeRestrictions(events.getAgeRestrictions());
+        event.setNumberPointsEvent(events.getNumberPointsEvent());
         event.setNumberParticipants(count);
+        event.setLinkDobroRF(events.getLinkDobroRF());
 
         return event;
     }
@@ -225,8 +232,7 @@ public class EventPsqlJPA implements IStorageEvent {
                                 .setParameter("id", events)
                                 .getResultList().size();
                         return "{\n\"status\": true, \n\"message\": \"Успешная регистрация на мероприятие\","
-                                + " \n\"countParticipants\": " + number + ",\n\"link\": "
-                                + events.getLinkDobroRF()
+                                + " \n\"countParticipants\": " + number
                                 + "\n}";
                     }
 
@@ -242,8 +248,7 @@ public class EventPsqlJPA implements IStorageEvent {
                             .setParameter("id", events)
                             .getResultList().size();
                     return "{\n\"status\": true, \n\"message\": \"Успешная решистрация на мероприятие\","
-                            + " \n\"countParticipants\": " + number + ",\n\"link\": "
-                            + events.getLinkDobroRF()
+                            + " \n\"countParticipants\": " + number
                             + "\n}";
                 }
             } else {
@@ -275,10 +280,11 @@ public class EventPsqlJPA implements IStorageEvent {
                     .getResultList();
             if (query.isEmpty()) {
                 return "{\n\"status\": false, \n\"message\": \"Произошла ошибка при удалении\"" + "\n}";
-                
+
             } else {
                 for (EUserEvent userEventToRemove : query) {
-                    entityManager.remove(entityManager.contains(userEventToRemove) ? userEventToRemove : entityManager.merge(userEventToRemove));
+                    entityManager.remove(entityManager.contains(userEventToRemove) ? userEventToRemove
+                            : entityManager.merge(userEventToRemove));
                 }
 
                 return "{\n\"status\": false,\n\"message\":\"Успешно удалено мероприятие из списка\"\n}";
@@ -289,26 +295,103 @@ public class EventPsqlJPA implements IStorageEvent {
     }
 
     @Override
-    public Boolean addEvent(Event data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addEvent'");
+    @Transactional
+    public void addEvent(Event data) {
+        EEvent ev = new EEvent();
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Timestamp timestamp = Timestamp.valueOf(localDateTime);
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        LocalDateTime localDate = LocalDateTime.parse(data.getDateEvent(), inputFormatter);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()));
+
+        ev.setAddressEvent(data.getAddressEvent());
+        ev.setAgeRestrictions(data.getAgeRestrictions());
+        ev.setDateCreation(timestamp);
+        ev.setDateEvent(calendar);
+        ev.setDescriptionEvent(data.getDescriptionEvent());
+        ev.setEventFormat(data.getEventFormat());
+        ev.setEventType(data.getEventType());
+        ev.setImage(data.getImage());
+        ev.setLinkDobroRF(data.getLinkDobroRF());
+        ev.setMaxNumberParticipants(data.getMaxNumberParticipants());
+        ev.setNameEvent(data.getNameEvent());
+        ev.setNumberPointsEvent(data.getNumberPointsEvent());
+
+        entityManager.persist(ev);
     }
 
     @Override
-    public Boolean deleteEvent(Integer eventID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteEvent'");
+    @Transactional
+    public void deleteEvent(Integer eventID) {
+        EEvent events = entityManager.find(EEvent.class, eventID);
+
+        if (events != null) {
+            entityManager.remove(events);
+        } else {
+            throw new EntityNotFoundException("Event with ID " + eventID + " not found.");
+        }
     }
 
     @Override
-    public Boolean changeEventInfo(Integer eventID, Event data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'changeEventInfo'");
+    @Transactional
+    public void changeEventInfo(Integer eventID, Event data) {
+        EEvent ev = entityManager.find(EEvent.class, eventID);
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        LocalDateTime localDate = LocalDateTime.parse(data.getDateEvent(), inputFormatter);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()));
+
+        ev.setAddressEvent(data.getAddressEvent());
+        ev.setAgeRestrictions(data.getAgeRestrictions());
+        ev.setDateEvent(calendar);
+        ev.setDescriptionEvent(data.getDescriptionEvent());
+        ev.setEventFormat(data.getEventFormat());
+        ev.setEventType(data.getEventType());
+        ev.setImage(data.getImage());
+        ev.setLinkDobroRF(data.getLinkDobroRF());
+        ev.setMaxNumberParticipants(data.getMaxNumberParticipants());
+        ev.setNameEvent(data.getNameEvent());
+        ev.setNumberPointsEvent(data.getNumberPointsEvent());
+
+        entityManager.merge(ev);
     }
 
     @Override
     public List<User> receiveUsersByEvent(Integer eventID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveUsersByEvent'");
+        EEvent event = entityManager.find(EEvent.class, eventID);
+        
+        List<EUserEvent> results = entityManager.createQuery(
+                "SELECT p from EUserEvent p where p.fkEventID = :id",
+                EUserEvent.class)
+                .setParameter("id", event)
+                .getResultList();
+        if (results.isEmpty()) {
+            return null;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(Date.from(timestamp.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
+
+            List<User> users = new ArrayList<>();
+            for (EUserEvent ue : results) {
+                User u = new User();
+                u.setUserID(ue.getFkUserID().getIdUser());
+                u.setLastName(ue.getFkUserID().getLastName());
+                u.setName(ue.getFkUserID().getFirstName());
+                u.setPatronymic(ue.getFkUserID().getLastName());
+                u.setStatus(
+                        ue.getFkEventID().getDateEvent().compareTo(calendar) > 0
+                                ? false
+                                : true);
+                users.add(u);
+            }
+
+            return users;
+        }
     }
 }

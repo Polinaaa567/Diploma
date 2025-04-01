@@ -1,4 +1,4 @@
-package local.arch.apllication.interfaces.user;
+package local.arch.application.interfaces.user;
 
 public interface IStorageUserUsing {
     void useStorage(IStorageUser storageUser);

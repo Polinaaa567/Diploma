@@ -116,50 +116,149 @@ SET CLIENT_ENCODING TO 'UTF8';
 -- );
 
 
-CREATE SEQUENCE IF NOT EXISTS users_events_user_event_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
+-- CREATE SEQUENCE IF NOT EXISTS users_events_user_event_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
 
 
-CREATE TABLE IF NOT EXISTS users_events
-(
-    user_event_id integer NOT NULL DEFAULT nextval('users_events_user_event_id_seq'::regclass),
-    fk_user_id integer NOT NULL,
-    fk_event_id integer NOT NULL,
-    date_creation timestamp with time zone NOT NULL,
-    stamp_participate boolean,
-    time_participate double precision,
-    CONSTRAINT users_events_pkey PRIMARY KEY (user_event_id),
-    CONSTRAINT users_events_fk_event_id_fkey FOREIGN KEY (fk_event_id)
-        REFERENCES public.events (event_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID,
-    CONSTRAINT users_events_fk_user_id_fkey FOREIGN KEY (fk_user_id)
-        REFERENCES public.users (id_user) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID
-);
+-- CREATE TABLE IF NOT EXISTS users_events
+-- (
+--     user_event_id integer NOT NULL DEFAULT nextval('users_events_user_event_id_seq'::regclass),
+--     fk_user_id integer NOT NULL,
+--     fk_event_id integer NOT NULL,
+--     date_creation timestamp with time zone NOT NULL,
+--     stamp_participate boolean,
+--     time_participate double precision,
+--     CONSTRAINT users_events_pkey PRIMARY KEY (user_event_id),
+--     CONSTRAINT users_events_fk_event_id_fkey FOREIGN KEY (fk_event_id)
+--         REFERENCES public.events (event_id) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE NO ACTION
+--         NOT VALID,
+--     CONSTRAINT users_events_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+--         REFERENCES public.users (id_user) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE NO ACTION
+--         NOT VALID
+-- );
 
-ALTER TABLE events 
-DROP COLUMN time_event;
+-- ALTER TABLE events 
+-- DROP COLUMN time_event;
 
-insert into events (name_event, description_event, event_format, number_points_event, date_creation, date_event) values 
-	('Субботник для концерта крида', 'Драка за места у ног егорки. Кто выжил - тот и выиграл. Драться можно всем чем угодно: грабли, лопаты, метёлки, дети, старики. Да начнуться же голодные игры. Удачи, если же она вам понадобиться',
-'очно', 45, '2003-04-10', '16-04-2025 15:40:00'
-);
+-- insert into events (name_event, description_event, event_format, number_points_event, date_creation, date_event) values 
+-- 	('Субботник для концерта крида', 'Драка за места у ног егорки. Кто выжил - тот и выиграл. Драться можно всем чем угодно: грабли, лопаты, метёлки, дети, старики. Да начнуться же голодные игры. Удачи, если же она вам понадобиться',
+-- 'очно', 45, '2003-04-10', '16-04-2025 15:40:00'
+-- );
 
-ALTER TABLE users 
-DROP COLUMN number_phone;
+-- ALTER TABLE users 
+-- DROP COLUMN number_phone;
 
-ALTER TABLE users RENAME COLUMN email TO login;
+-- ALTER TABLE users RENAME COLUMN email TO login;
 
 
 -- INSERT INTO users_events(
 -- 	fk_user_id, fk_event_id, date_creation, stamp_participate, time_participate)
 -- 	VALUES (?, ?, ?, ?, ?);
 
+-- ALTER TABLE events 
+-- DROP COLUMN age_restrictions;
+
+-- ALTER TABLE events 
+-- add COLUMN age_restrictions Integer DEFAULT 16;
+
+-- ALTER TABLE users 
+-- DROP COLUMN age_stamp;
+
+-- ALTER TABLE users 
+-- add COLUMN age_stamp TEXT DEFAULT '16-17';
+
+-- ALTER TABLE users 
+-- DROP COLUMN clothing_size;
+
+-- ALTER TABLE users 
+-- add COLUMN clothing_size TEXT DEFAULT 'xs';
+
+-- ALTER TABLE users 
+-- add COLUMN form_education TEXT DEFAULT 'очная';
+
+-- ALTER TABLE users 
+-- add COLUMN basis_education TEXT DEFAULT 'бюджет';
+
+-- drop TABLE IF EXISTS users_events;
+
+-- CREATE TABLE IF NOT EXISTS users_events
+-- (
+--     user_event_id integer NOT NULL DEFAULT nextval('users_events_user_event_id_seq'::regclass),
+--     fk_user_id integer NOT NULL,
+--     fk_event_id integer NOT NULL,
+--     date_creation timestamp with time zone NOT NULL,
+--     stamp_participate boolean,
+--     time_participate double precision,
+--     CONSTRAINT users_events_pkey PRIMARY KEY (user_event_id),
+--     CONSTRAINT users_events_fk_event_id_fkey FOREIGN KEY (fk_event_id)
+--         REFERENCES public.events (event_id) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE CASCADE
+--         NOT VALID,
+--     CONSTRAINT users_events_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+--         REFERENCES public.users (id_user) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE CASCADE
+--         NOT VALID
+-- );
+
+
+CREATE SEQUENCE IF NOT EXISTS levels_level_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE TABLE IF NOT EXISTS levels
+(
+    level_id integer NOT NULL DEFAULT nextval('levels_level_id_seq'::regclass),
+    level_number integer NOT NULL,
+    max_number_points integer NOT NULL,
+    CONSTRAINT levels_pkey PRIMARY KEY (level_id)
+);
+
+INSERT INTO levels(
+	level_number, max_number_points)
+	VALUES (1, 1000);
+
+INSERT INTO levels(
+	level_number, max_number_points)
+	VALUES (2, 2000);
+
+INSERT INTO levels(
+	level_number, max_number_points)
+	VALUES (3, 3000);
+
+INSERT INTO levels(
+	level_number, max_number_points)
+	VALUES (4, 4000);
+
+CREATE SEQUENCE IF NOT EXISTS public.users_points_user_points_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE TABLE IF NOT EXISTS users_points
+(
+    user_points_id integer NOT NULL DEFAULT nextval('users_points_user_points_id_seq'::regclass),
+    fk_user_id integer NOT NULL,
+    points integer NOT NULL DEFAULT 0,
+    date_change timestamp with time zone NOT NULL,
+    CONSTRAINT users_points_pkey PRIMARY KEY (user_points_id),
+    CONSTRAINT users_points_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+        REFERENCES users (id_user) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+        NOT VALID
+);

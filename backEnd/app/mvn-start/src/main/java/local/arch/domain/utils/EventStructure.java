@@ -24,12 +24,12 @@ public class EventStructure {
         event.setAddressEvent(eEvent.getAddressEvent());
 
 
-        Integer ageRestrictions = eEvent.getAgeRestrictions();
-        if (ageRestrictions != null) {
-            event.setAgeRestrictions(ageRestrictions.intValue());
-        } else {
-            event.setAgeRestrictions(0);
-        }
+        // String ageRestrictions = eEvent.getAgeRestrictions();
+        // if (ageRestrictions != null) {
+        //     event.setAgeRestrictions(ageRestrictions);
+        // } else {
+        //     event.setAgeRestrictions(0);
+        // }
 
         event.setDateCreation(eEvent.getDateCreation());
 
@@ -63,9 +63,10 @@ public class EventStructure {
     public static EEvent toEEvent(Event e) {
         try {
             EEvent eE = new EEvent();
+            
             eE.setAddressEvent(e.getAddressEvent());
 
-            eE.setAgeRestrictions(e.getAgeRestrictions());
+            // eE.setAgeRestrictions(e.getAgeRestrictions());
 
             eE.setDateCreation(e.getDateCreation());
 

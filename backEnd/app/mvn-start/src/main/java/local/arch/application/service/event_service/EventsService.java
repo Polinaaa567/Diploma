@@ -1,10 +1,10 @@
-package local.arch.apllication.service.event_service;
+package local.arch.application.service.event_service;
 
 import java.util.List;
 
-import local.arch.apllication.interfaces.event.IEventsService;
-import local.arch.apllication.interfaces.event.IStorageEvent;
-import local.arch.apllication.interfaces.event.IStorageEventUsing;
+import local.arch.application.interfaces.event.IEventsService;
+import local.arch.application.interfaces.event.IStorageEvent;
+import local.arch.application.interfaces.event.IStorageEventUsing;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.User;
 import local.arch.domain.entities.UserEvent;
@@ -45,30 +45,34 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     }
 
     @Override
-    public Boolean addEvent(Event data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addEvent'");
+    public void addEvent(Event data) {
+        storageEvent.addEvent(data);
     }
 
     @Override
-    public Boolean deleteEvent(Integer eventID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteEvent'");
+    public void deleteEvent(Integer eventID) {
+        storageEvent.deleteEvent(eventID);
     }
 
     @Override
-    public Boolean changeEventInfo(Integer eventID, Event data) {
-        throw new UnsupportedOperationException("Unimplemented method 'changeEventInfo'");
+    public void changeEventInfo(Integer eventID, Event data) {
+        storageEvent.changeEventInfo(eventID, data);
     }
 
     @Override
     public List<User> receiveUsersByEvent(Integer eventID) {
-        throw new UnsupportedOperationException("Unimplemented method 'receiveUsersByEvent'");
+        return storageEvent.receiveUsersByEvent(eventID);
     }
 
     @Override
     public void useStorage(IStorageEvent storageEvent) {
         this.storageEvent = storageEvent;
+    }
+
+    @Override
+    public String saveInfoParticipance() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'saveInfoParticipance'");
     }
 
 }

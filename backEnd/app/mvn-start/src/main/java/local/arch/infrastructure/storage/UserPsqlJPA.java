@@ -1,8 +1,5 @@
 package local.arch.infrastructure.storage;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,40 +11,19 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
-import local.arch.apllication.interfaces.user.IStorageUser;
+import local.arch.application.interfaces.user.IStorageUser;
 import local.arch.domain.entities.User;
+import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.ERole;
 import local.arch.infrastructure.storage.model.EUser;
 
 @Named
 public class UserPsqlJPA implements IStorageUser {
 
+    Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+
     @PersistenceContext(unitName = "Volunteering")
     private EntityManager entityManager;
-
-    @Override
-    public User updateUserData(User user) {
-
-        throw new UnsupportedOperationException("Unimplemented method 'updateUserData'");
-    }
-
-    @Override
-    public User receiveUserData(Integer idUser, User user) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveUserData'");
-    }
-
-    @Override
-    public List<User> receiveUserRating() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveUserRating'");
-    }
-
-    @Override
-    public List<User> receiveCertificate(Integer userID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveCertificate'");
-    }
 
     @Override
     @Transactional
@@ -56,7 +32,6 @@ public class UserPsqlJPA implements IStorageUser {
         String queryString = "SELECT p FROM EUser p WHERE p.login = :login";
 
         TypedQuery<EUser> query = entityManager.createQuery(queryString, EUser.class);
-
         query.setParameter("login", user.getLogin());
 
         try {
@@ -66,6 +41,7 @@ public class UserPsqlJPA implements IStorageUser {
             }
         } catch (NoResultException e) {
             EUser newUser = new EUser();
+
             ERole role = entityManager
                     .createQuery("SELECT r FROM ERole r WHERE r.nameRoles = :nameRoles", ERole.class)
                     .setParameter("nameRoles", "Пользователь")
@@ -77,11 +53,14 @@ public class UserPsqlJPA implements IStorageUser {
             newUser.setPassword(bcryptHashString);
 
             newUser.setFkRoleID(role);
-            LocalDateTime localDateTime = LocalDateTime.now();
-            Timestamp timestamp = Timestamp.valueOf(localDateTime);
-
             newUser.setDateCreation(timestamp);
             entityManager.persist(newUser);
+
+            EPoints newUserPoints = new EPoints();
+            newUserPoints.setDateChange(timestamp);
+            newUserPoints.setFkUserID(newUser);
+            newUserPoints.setPoints(1);
+            entityManager.persist(newUserPoints);
 
             return "{ \n \"status\": true,\n\"message\":\"Регистрация прошла успешно\", \n\"id\": "
                     + newUser.getIdUser() + "\n}";
@@ -109,6 +88,56 @@ public class UserPsqlJPA implements IStorageUser {
         } catch (NoResultException e) {
             return "{ \n \"status\": false, \n\"message\": \"Неверный логин или пароль\" \n}";
         }
+    }
+
+    @Override
+    public User receiveUserData(Integer idUser) {
+        EUser result = entityManager.find(EUser.class, idUser);
+
+        User user = new User();
+        
+        user.setAgeStamp(result.getAgeStamp());
+        user.setClothingSize(result.getClothingSize());
+        user.setName(result.getFirstName());
+        user.setLastName(result.getLastName());
+        user.setPatronymic(result.getPatronymic());
+        user.setFormEducation(result.getFormEducation());
+        user.setBasisEducation(result.getBasisEducation());
+
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public void updateUserData(User user) {
+        EUser result = entityManager.find(EUser.class, user.getUserID());
+
+        // EUser results = entityManager.createQuery(
+        // "SELECT p FROM EUser p where p.idUser = :id", EUser.class)
+        // .setParameter("id", user.getIdUser())
+        // .getSingleResult();
+
+        result.setAgeStamp(user.getAgeStamp());
+        result.setClothingSize(user.getClothingSize());
+        result.setFirstName(user.getName());
+        result.setLastName(user.getLastName());
+        result.setPatronymic(user.getPatronymic());
+        result.setBasisEducation(user.getBasisEducation());
+        result.setFormEducation(user.getFormEducation());
+
+        entityManager.merge(result);
+    }
+
+    @Override
+    public List<User> receiveUserRating() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'receiveUserRating'");
+    }
+
+    @Override
+    public List<User> receiveCertificate(Integer userID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'receiveCertificate'");
     }
 
     @Override

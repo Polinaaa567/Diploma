@@ -47,7 +47,7 @@ public class EUser {
     private String clothingSize;
     
     @Column(name = "\"age_stamp\"")
-    private Boolean ageStamp;
+    private String ageStamp;
     
     @OneToOne
     @JoinColumn(name = "\"fk_role_id\"", referencedColumnName = "\"id_role\"")
@@ -56,4 +56,11 @@ public class EUser {
     @Column(name = "\"date_creation\"")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd' 'HH:mm:ss")
     private Timestamp dateCreation;
+
+    @Column(name = "\"form_education\"")
+    private String formEducation;
+
+    @Column(name = "\"basis_education\"")
+    private String basisEducation;
 }
+

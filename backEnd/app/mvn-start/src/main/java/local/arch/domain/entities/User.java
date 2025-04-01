@@ -8,11 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-    private Integer idUser;
+    private Integer userID;
     
     private String lastName;
     
-    private String firstName;
+    private String name;
     
     private String patronymic;
     
@@ -22,15 +22,23 @@ public class User {
     
     private String clothingSize;
     
-    private boolean ageStamp;
+    private String ageStamp;
     
     private Integer roleID;
     
     private Timestamp dateCreation; 
 
-    private Byte photo_certificate_data; 
+    private byte[] photo_certificate_data; 
 
     private Integer points;
 
     private Integer levelNumber;
+
+    private String formEducation;
+
+    private String basisEducation;
+
+    private String msg;
+
+    private Boolean status;
 }

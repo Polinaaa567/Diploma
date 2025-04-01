@@ -8,7 +8,6 @@ import jakarta.json.JsonObjectBuilder;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -16,8 +15,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-
-import local.arch.apllication.interfaces.event.IEventsService;
+import local.arch.application.interfaces.event.IEventsService;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.UserEvent;
 import local.arch.infrastructure.builder.BuiltEvent;
@@ -34,6 +32,7 @@ public class Events {
     @BuiltEvent
     IEventsService eventsService;
 
+    // +
     @GET
     @Produces("application/json")
     @Consumes("application/json")
@@ -52,10 +51,11 @@ public class Events {
 
             arrayBuilder.add(objBuilder);
         }
-        return Response.ok(arrayBuilder.build()).build();
 
+        return Response.ok(arrayBuilder.build()).build();
     }
 
+    // +
     @GET
     @Produces("application/json")
     @Path("/past")
@@ -74,9 +74,9 @@ public class Events {
                         .add("description", event.getDescriptionEvent())
                         .add("photo", event.getImage() != null ? event.getImage().toString() : "[]")
                         .add("stampParticipate",
-                                event.getStampParticipate() != null ? event.getStampParticipate().toString() : "null")
+                                event.getStampParticipate() != null ? event.getStampParticipate().toString() : "")
                         .add("timeParticipate",
-                                event.getTimeParticipate() != null ? event.getTimeParticipate().toString() : "null");
+                                event.getTimeParticipate() != null ? event.getTimeParticipate().toString() : "");
                 ;
                 arrayBuilder.add(objBuilder);
             }
@@ -89,6 +89,7 @@ public class Events {
         }
     }
 
+    // +
     @GET
     @Produces("application/json")
     @Path("/future")
@@ -118,6 +119,7 @@ public class Events {
         }
     }
 
+    // +
     @GET
     @Produces("application/json")
     @Path("/{eventID}")
@@ -134,17 +136,20 @@ public class Events {
                 .add("description", event.getDescriptionEvent().toString())
                 .add("photo", event.getImage() != null ? event.getImage().toString() : "[]")
                 .add("status", event.getStatusParticipate())
-                .add("address", event.getAddressEvent() != null ? event.getAddressEvent().toString() : "null")
-                .add("format", event.getEventFormat() != null ? event.getEventFormat().toString() : "null")
-                .add("type", event.getEventType() != null ? event.getEventType().toString() : "null")
-                .add("maxCountParticipants", event.getMaxNumberParticipants() != null ? event.getMaxNumberParticipants() : 0)
+                .add("address", event.getAddressEvent() != null ? event.getAddressEvent().toString() : "")
+                .add("format", event.getEventFormat() != null ? event.getEventFormat().toString() : "")
+                .add("type", event.getEventType() != null ? event.getEventType().toString() : "")
+                .add("maxCountParticipants",
+                        event.getMaxNumberParticipants() != null ? event.getMaxNumberParticipants() : 0)
                 .add("countParticipants", event.getNumberParticipants())
                 .add("age", event.getAgeRestrictions() != null ? event.getAgeRestrictions() : 16)
-                .add("points", event.getNumberPointsEvent() != null ?event.getNumberPointsEvent() : 0 );
+                .add("points", event.getNumberPointsEvent() != null ? event.getNumberPointsEvent() : 0)
+                .add("link", event.getLinkDobroRF() != null ? event.getLinkDobroRF() : "");
 
         return Response.ok(objBuilder.build()).build();
     }
 
+    // + -
     @POST
     @Produces("application/json")
     @Path("/sign-up")
@@ -157,10 +162,13 @@ public class Events {
         return Response.ok(ev).build();
     }
 
+    // +
     @POST
     @Produces("application/json")
     @Path("/{eventID}/users/{userID}")
     public Response deleteUsersEvent(@PathParam("eventID") Integer eventID, @PathParam("userID") Integer userID) {
+
+        // Отменить запись на мероприятие у пользователя
 
         UserEvent userEvent = new UserEvent();
         userEvent.setEventID(eventID);
@@ -169,7 +177,5 @@ public class Events {
         String ev = eventsService.deleteUsersEvent(userEvent);
 
         return Response.ok(ev).build();
-
-        // Отменить запись на мероприятие у пользователя
     }
 }

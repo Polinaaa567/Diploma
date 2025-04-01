@@ -1,39 +1,72 @@
 package local.arch.infrastructure.controller.users_data;
 
 import jakarta.inject.Inject;
-import jakarta.websocket.server.PathParam;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-import local.arch.apllication.interfaces.user.IUserService;
+import local.arch.application.interfaces.user.IUserService;
+import local.arch.domain.entities.User;
 import local.arch.infrastructure.builder.BuiltUser;
 
 @Path("/profile/users")
-public class Profile{
-    // @Inject
-    // @BuiltUser
-    // IUserService userService;
-    
+public class Profile {
+
+    private Jsonb jsonb = JsonbBuilder.create();
+
+    @Inject
+    @BuiltUser
+    IUserService userService;
+
     @GET
     @Produces("application/json")
-    @Path("/{userID}")
-    public Response getInfoAboutUsers(@PathParam("userID") int userID) {
-        
-        // Получить данные о пользователе
-        // String msg = userService.receiveUserData(userID);
+    public Response getInfoAboutUsers(@QueryParam("userID") Integer userID) {
 
-        return Response.ok("check").build();
+        // Получить данные о пользователе
+
+        User user = userService.receiveUserData(userID);
+
+        if (user != null) {
+            JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                    .add("lastName", user.getLastName() != null ? user.getLastName() : "")
+                    .add("name", user.getName() != null ? user.getName() : "")
+                    .add("patronymic", user.getPatronymic() != null ? user.getPatronymic() : "")
+                    .add("clothingSize", user.getClothingSize() != null ? user.getClothingSize() : "xs")
+                    .add("ageStamp", user.getAgeStamp() != null ? user.getAgeStamp() : "16-17")
+                    .add("formEducation", user.getFormEducation() != null ? user.getFormEducation() : "очная")
+                    .add("basisEducation", user.getBasisEducation() != null ?user.getBasisEducation() : "бюджет");
+
+            return Response.ok(objBuilder.build()).build();
+        } else {
+            JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                    .add("status", false)
+                    .add("message", "Ошибка при нахождении пользователя " + userID);
+
+            return Response.ok(objBuilder.build()).build();
+        }
     }
-    
+
     @PUT
     @Produces("application/json")
     public Response changeDataAboutUsers(String userDataJSON) {
-        
-        // Изменить данные о пользователе
-        // String msg = userService.updateUserData(userDataJSON);
 
-        return Response.ok("check").build();
+        // Изменить данные о пользователе
+        User user = jsonb.fromJson(userDataJSON, User.class);
+
+        try {
+
+            userService.updateUserData(user);
+
+            return Response.ok("OK").build();
+        } catch (Exception e) {
+            return Response.ok("Error").build();
+
+        }
     }
 }
