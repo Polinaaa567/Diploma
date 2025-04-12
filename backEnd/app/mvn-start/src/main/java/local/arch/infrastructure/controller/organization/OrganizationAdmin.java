@@ -3,29 +3,39 @@ package local.arch.infrastructure.controller.organization;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+
+import local.arch.application.interfaces.organization.IOrganizationService;
 import local.arch.domain.entities.InfoCenter;
+import local.arch.infrastructure.builder.organization_annotation.BuiltOrganization;
 
 @Path("/admin/organization")
 public class OrganizationAdmin {
 
-    private Jsonb jsonb = JsonbBuilder.create();
+    StringBuilder organizationJson = new StringBuilder();
+    JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
+    @Inject
+    @BuiltOrganization
+    IOrganizationService organizationService;
+
+    // -
     @PUT
     @Produces("text/plain")
-    public Response changeInfoAboutOrganization(String infoAboutOrgJSON) {
-        
-        // Принять изменённые данные и изменить в бд
+    @Consumes("application/json")
+    public Response changeInfoAboutOrganization(InfoCenter infoAboutOrg) {
 
-        InfoCenter infoString = jsonb.fromJson(infoAboutOrgJSON, InfoCenter.class);
+        // Принять изменённые данные и изменить в бд
 
         Timestamp dateChange = Timestamp.from(Instant.now());
 
-        return Response.ok(infoString.getAddress() + dateChange.toString()).build();
+        return Response.ok(infoAboutOrg.getAddress() + dateChange.toString()).build();
     }
 }

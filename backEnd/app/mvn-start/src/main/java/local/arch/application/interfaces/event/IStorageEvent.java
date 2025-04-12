@@ -3,7 +3,6 @@ package local.arch.application.interfaces.event;
 import java.util.List;
 
 import local.arch.domain.entities.Event;
-import local.arch.domain.entities.User;
 import local.arch.domain.entities.UserEvent;
 
 public interface IStorageEvent {
@@ -25,5 +24,7 @@ public interface IStorageEvent {
 
     public void changeEventInfo(Integer eventID, Event data);
 
-    public List<User> receiveUsersByEvent(Integer eventID);
+    public List<UserEvent> receiveUsersByEvent(Integer eventID);
+
+    public String saveInfoParticipance(Integer eventID, UserEvent ue);
 }

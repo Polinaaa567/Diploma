@@ -1,7 +1,9 @@
 package local.arch.domain.entities;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,11 +12,13 @@ import lombok.Setter;
 public class News {
     private Integer newsID;
 
-    private String headlineNews;
+    @NotNull(message = "Заголовок не должен быть пустым")
+    private String headline;
     
-    private String descriptionNews;
+    @NotNull(message = "Описание не должно быть пустым")
+    private String description;
 
     private Timestamp dateCreation;
 
-    private Byte imageData;
+    private List<Byte[]> imageData ;
 }

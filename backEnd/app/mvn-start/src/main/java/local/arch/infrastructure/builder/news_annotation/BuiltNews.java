@@ -1,4 +1,5 @@
-package local.arch.infrastructure.builder;
+package local.arch.infrastructure.builder.news_annotation;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,4 +9,4 @@ import jakarta.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.METHOD })
-public @interface BuiltEvent {}
+public @interface BuiltNews {}

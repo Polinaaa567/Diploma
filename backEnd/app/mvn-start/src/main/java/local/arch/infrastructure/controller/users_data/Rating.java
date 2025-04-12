@@ -7,13 +7,14 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import local.arch.application.interfaces.user.IUserService;
-import local.arch.infrastructure.builder.BuiltUser;
+import local.arch.infrastructure.builder.user_annotation.BuiltUser;
 
 @Path("/rating")
 public class Rating {
-    // @Inject
-    // @BuiltUser
-    // IUserService userService;
+    
+    @Inject
+    @BuiltUser
+    IUserService userService;
         
     @GET
     @Produces("application/json")

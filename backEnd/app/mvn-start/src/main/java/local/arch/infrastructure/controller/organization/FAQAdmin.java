@@ -1,34 +1,48 @@
 package local.arch.infrastructure.controller.organization;
 
+import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Response;
+
+import local.arch.application.interfaces.organization.IOrganizationService;
+import local.arch.domain.entities.FAQData;
+import local.arch.infrastructure.builder.organization_annotation.BuiltOrganization;
 
 @Path("/admin/faq")
 public class FAQAdmin {
-    
-    // @POST
-    // @Produces("application/json")
-    // public Response addFAQ(String faqDataJSON) {
-       
-    //     // добавить вопрос и ответ
-        
-    //     return Response.ok("").build();
-    // }
 
-    // @PUT
-    // @Produces("application/json")
-    // @Path("/{questionID}")
-    // public void updateFAQ(@PathParam("questionID") Integer questionID, String faqDataJSON) {
+    StringBuilder faqJson = new StringBuilder();
+    JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
-    //     // изменить вопрос или ответ
-    
-    // }
-    
+    @Inject
+    @BuiltOrganization
+    IOrganizationService organizationService;
+
+    // -
+    @POST
+    @Produces("application/json")
+    @Consumes("application/json")
+    public void addFAQ(FAQData faq) {
+
+    }
+
+    @PUT
+    @Produces("application/json")
+    @Consumes("application/json")
+    @Path("/{questionID}")
+    public void updateFAQ(@PathParam("questionID") Integer questionID, FAQData faq) {
+
+        // изменить вопрос или ответ
+
+    }
+
     @DELETE
     @Produces("application/json")
     @Path("/{questionID}")

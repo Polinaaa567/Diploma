@@ -5,8 +5,6 @@ import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -15,16 +13,14 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
+
 import local.arch.application.interfaces.event.IEventsService;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.UserEvent;
-import local.arch.infrastructure.builder.BuiltEvent;
+import local.arch.infrastructure.builder.event_annotation.BuiltEvent;
 
 @Path("/events")
 public class Events {
-
-    private Jsonb jsonb = JsonbBuilder.create();
-    StringBuilder eventJson = new StringBuilder();
 
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
@@ -44,10 +40,12 @@ public class Events {
 
             JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                     .add("id", event.getEventID())
-                    .add("date", event.getDateEvent().toString())
-                    .add("name", event.getNameEvent())
-                    .add("description", event.getDescriptionEvent())
-                    .add("photo", event.getImage() != null ? event.getImage().toString() : "[]");
+                    .add("date", event.getDate().toString())
+                    .add("name", event.getName())
+                    .add("description", event.getDescription())
+                    .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
+                    .add("isRelevance", event.getIsRelevance())
+                    .add("isParticipation", event.getIsParticipation() != null ? event.getIsParticipation() : false);
 
             arrayBuilder.add(objBuilder);
         }
@@ -69,15 +67,14 @@ public class Events {
 
                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                         .add("id", event.getEventID())
-                        .add("date", event.getDateEvent().toString())
-                        .add("name", event.getNameEvent())
-                        .add("description", event.getDescriptionEvent())
-                        .add("photo", event.getImage() != null ? event.getImage().toString() : "[]")
+                        .add("date", event.getDate().toString())
+                        .add("name", event.getName())
+                        .add("description", event.getDescription())
+                        .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
                         .add("stampParticipate",
-                                event.getStampParticipate() != null ? event.getStampParticipate().toString() : "")
+                                event.getStampParticipate() != null ? event.getStampParticipate() : false)
                         .add("timeParticipate",
-                                event.getTimeParticipate() != null ? event.getTimeParticipate().toString() : "");
-                ;
+                                event.getTimeParticipate() != null ? event.getTimeParticipate() : 0.0);
                 arrayBuilder.add(objBuilder);
             }
 
@@ -104,10 +101,10 @@ public class Events {
 
                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                         .add("id", event.getEventID())
-                        .add("date", event.getDateEvent().toString())
-                        .add("name", event.getNameEvent())
-                        .add("description", event.getDescriptionEvent())
-                        .add("photo", event.getImage() != null ? event.getImage().toString() : "[]");
+                        .add("date", event.getDate().toString())
+                        .add("name", event.getName())
+                        .add("description", event.getDescription())
+                        .add("image", event.getImage() != null ? event.getImage().toString() : "[]");
 
                 arrayBuilder.add(objBuilder);
             }
@@ -131,20 +128,20 @@ public class Events {
         Event event = eventsService.receiveEventInfo(userEvent);
 
         JsonObjectBuilder objBuilder = Json.createObjectBuilder()
-                .add("date", event.getDateEvent().toString())
-                .add("name", event.getNameEvent().toString())
-                .add("description", event.getDescriptionEvent().toString())
-                .add("photo", event.getImage() != null ? event.getImage().toString() : "[]")
+                .add("date", event.getDate().toString())
+                .add("name", event.getName().toString())
+                .add("description", event.getDescription().toString())
+                .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
                 .add("status", event.getStatusParticipate())
-                .add("address", event.getAddressEvent() != null ? event.getAddressEvent().toString() : "")
-                .add("format", event.getEventFormat() != null ? event.getEventFormat().toString() : "")
-                .add("type", event.getEventType() != null ? event.getEventType().toString() : "")
+                .add("address", event.getAddress() != null ? event.getAddress().toString() : "")
+                .add("format", event.getFormat() != null ? event.getFormat().toString() : "")
+                .add("type", event.getType() != null ? event.getType().toString() : "")
                 .add("maxCountParticipants",
-                        event.getMaxNumberParticipants() != null ? event.getMaxNumberParticipants() : 0)
+                        event.getMaxCountParticipants() != null ? event.getMaxCountParticipants() : 0)
                 .add("countParticipants", event.getNumberParticipants())
-                .add("age", event.getAgeRestrictions() != null ? event.getAgeRestrictions() : 16)
-                .add("points", event.getNumberPointsEvent() != null ? event.getNumberPointsEvent() : 0)
-                .add("link", event.getLinkDobroRF() != null ? event.getLinkDobroRF() : "");
+                .add("age", event.getAge() != null ? event.getAge() : 16)
+                .add("points", event.getPoints() != null ? event.getPoints() : 0)
+                .add("linkDobroRF", event.getLinkDobroRF() != null ? event.getLinkDobroRF() : "");
 
         return Response.ok(objBuilder.build()).build();
     }
@@ -152,10 +149,9 @@ public class Events {
     // + -
     @POST
     @Produces("application/json")
+    @Consumes("application/json")
     @Path("/sign-up")
-    public Response signUpForEvent(String signUpInfoJSON) {
-
-        UserEvent userEvent = jsonb.fromJson(signUpInfoJSON, UserEvent.class);
+    public Response signUpForEvent(UserEvent userEvent) {
 
         String ev = eventsService.signUpForEvent(userEvent);
 

@@ -60,12 +60,25 @@ public class EEvent {
     private String linkDobroRF;
 
     @Column(name = "\"image\"")
-    private byte[] image;
+    private Byte[] image;
 
     @Column(name = "\"date_event\"", nullable=true)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar dateEvent;
 
-    public EEvent() {
+    @Column(name = "\"is_participation\"")
+    private Boolean isParticipation;
+
+    public EEvent() {}
+
+    public EEvent(Integer eventID, Calendar dateEvent, String nameEvent, 
+    String descriptionEvent, Byte[] image, boolean isParticipation) {
+        this.eventID = eventID;
+        this.dateEvent = dateEvent;
+        this.nameEvent = nameEvent;
+        this.descriptionEvent = descriptionEvent;
+        this.image = image;
+        this.isParticipation = isParticipation;
+        // this.isRelevance = dateEvent != null && dateEvent.compareTo(Calendar.getInstance()) > 1;
     }
 }

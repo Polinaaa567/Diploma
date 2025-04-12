@@ -211,53 +211,100 @@ SET CLIENT_ENCODING TO 'UTF8';
 -- );
 
 
-CREATE SEQUENCE IF NOT EXISTS levels_level_id_seq
+-- CREATE SEQUENCE IF NOT EXISTS levels_level_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS levels
+-- (
+--     level_id integer NOT NULL DEFAULT nextval('levels_level_id_seq'::regclass),
+--     level_number integer NOT NULL,
+--     max_number_points integer NOT NULL,
+--     CONSTRAINT levels_pkey PRIMARY KEY (level_id)
+-- );
+
+-- INSERT INTO levels(
+-- 	level_number, max_number_points)
+-- 	VALUES (1, 1000);
+
+-- INSERT INTO levels(
+-- 	level_number, max_number_points)
+-- 	VALUES (2, 2000);
+
+-- INSERT INTO levels(
+-- 	level_number, max_number_points)
+-- 	VALUES (3, 3000);
+
+-- INSERT INTO levels(
+-- 	level_number, max_number_points)
+-- 	VALUES (4, 4000);
+
+-- CREATE SEQUENCE IF NOT EXISTS public.users_points_user_points_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS users_points
+-- (
+--     user_points_id integer NOT NULL DEFAULT nextval('users_points_user_points_id_seq'::regclass),
+--     fk_user_id integer NOT NULL,
+--     points integer NOT NULL DEFAULT 0,
+--     date_change timestamp with time zone NOT NULL,
+--     CONSTRAINT users_points_pkey PRIMARY KEY (user_points_id),
+--     CONSTRAINT users_points_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+--         REFERENCES users (id_user) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE CASCADE
+--         NOT VALID
+-- );
+
+
+-- insert INTO users (login, PASSWORD, fk_role_id, date_creation) VALUES ('admin', '$2a$14$2BV0F0C3Io5pl1jpJxkNkOsPCt3y45V/tISsdFz80jdeBsip/hJkG', 1, '2025-04-04 15:30:33');
+
+-- ALTER TABLE events 
+-- add COLUMN is_participation boolean DEFAULT false;
+
+CREATE SEQUENCE IF NOT EXISTS news_news_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS levels
+CREATE TABLE IF NOT EXISTS news
 (
-    level_id integer NOT NULL DEFAULT nextval('levels_level_id_seq'::regclass),
-    level_number integer NOT NULL,
-    max_number_points integer NOT NULL,
-    CONSTRAINT levels_pkey PRIMARY KEY (level_id)
+    news_id integer NOT NULL DEFAULT nextval('news_news_id_seq'::regclass),
+    headline_news text COLLATE pg_catalog."default" NOT NULL,
+    description_news text COLLATE pg_catalog."default" NOT NULL,
+    date_creation timestamp with time zone NOT NULL,
+    CONSTRAINT news_pkey PRIMARY KEY (news_id)
 );
 
-INSERT INTO levels(
-	level_number, max_number_points)
-	VALUES (1, 1000);
+insert into news (headline_news, description_news, date_creation) values 
+	('Лазарев признался что он ...', 'Как вам всем известно, Сергей Лазарев обладает мощной харизмой. Он сражает всех женщин наповал. 
+     Но он признался, что его сердце всё ещё свободно (Он просто не встретил меня 😄🤡))))', '16-04-2025 15:40:00'
+);
 
-INSERT INTO levels(
-	level_number, max_number_points)
-	VALUES (2, 2000);
-
-INSERT INTO levels(
-	level_number, max_number_points)
-	VALUES (3, 3000);
-
-INSERT INTO levels(
-	level_number, max_number_points)
-	VALUES (4, 4000);
-
-CREATE SEQUENCE IF NOT EXISTS public.users_points_user_points_id_seq
+CREATE SEQUENCE IF NOT EXISTS image_news_photo_id_seq
     INCREMENT 1
     START 1
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS users_points
+CREATE TABLE IF NOT EXISTS image_news
 (
-    user_points_id integer NOT NULL DEFAULT nextval('users_points_user_points_id_seq'::regclass),
-    fk_user_id integer NOT NULL,
-    points integer NOT NULL DEFAULT 0,
-    date_change timestamp with time zone NOT NULL,
-    CONSTRAINT users_points_pkey PRIMARY KEY (user_points_id),
-    CONSTRAINT users_points_fk_user_id_fkey FOREIGN KEY (fk_user_id)
-        REFERENCES users (id_user) MATCH SIMPLE
+    photo_id integer NOT NULL DEFAULT nextval('image_news_photo_id_seq'::regclass),
+    fk_news_id integer NOT NULL,
+    image_data bytea NOT NULL,
+    CONSTRAINT image_news_pkey PRIMARY KEY (photo_id),
+    CONSTRAINT image_news_fk_news_id_fkey FOREIGN KEY (fk_news_id)
+        REFERENCES public.news (news_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
         NOT VALID

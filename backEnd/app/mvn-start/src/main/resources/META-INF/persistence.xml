@@ -1,10 +1,20 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<persistence version="1.0" 
-xmlns="http://java.sun.com/xml/ns/persistence"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
-http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0"
+    xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+
     <persistence-unit name="Volunteering" transaction-type="JTA">
         <jta-data-source>jdbc/local_PG_Volunteering</jta-data-source>
+        <properties>
+            <property name="javax.persistence.sharedCache.mode" value="NONE" />
+            <property name="javax.persistence.cache.retrieveMode" value="BYPASS"/>
+            <property name="javax.persistence.cache.storeMode" value="BYPASS"/>
+
+            <property name="hibernate.jdbc.batch_size" value="20"/>
+            <property name="hibernate.order_updates" value="true"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            
+        </properties>
     </persistence-unit>
 </persistence>

@@ -5,15 +5,17 @@ import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
+
 import local.arch.application.interfaces.user.IUserService;
 import local.arch.domain.entities.User;
-import local.arch.infrastructure.builder.BuiltUser;
+import local.arch.infrastructure.builder.user_annotation.BuiltUser;
 
 @Path("/profile/users")
 public class Profile {
@@ -54,18 +56,18 @@ public class Profile {
 
     @PUT
     @Produces("application/json")
-    public Response changeDataAboutUsers(String userDataJSON) {
+    @Consumes("application/json")
+    public Response changeDataAboutUsers(User user) {
 
         // Изменить данные о пользователе
-        User user = jsonb.fromJson(userDataJSON, User.class);
+        // User user = jsonb.fromJson(userDataJSON, User.class);
 
         try {
-
             userService.updateUserData(user);
 
-            return Response.ok("OK").build();
+            return Response.ok("{\n\"status\": true\n}").build();
         } catch (Exception e) {
-            return Response.ok("Error").build();
+            return Response.ok("{\n\"status\": false\n}").build();
 
         }
     }

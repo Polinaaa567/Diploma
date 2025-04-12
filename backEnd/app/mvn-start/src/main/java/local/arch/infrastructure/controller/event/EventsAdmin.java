@@ -8,6 +8,7 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -16,10 +17,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
-import local.arch.infrastructure.builder.BuiltEvent;
 import local.arch.application.interfaces.event.IEventsService;
 import local.arch.domain.entities.Event;
-import local.arch.domain.entities.User;
+import local.arch.domain.entities.UserEvent;
+import local.arch.infrastructure.builder.event_annotation.BuiltEvent;
 
 @Path("/admin/events")
 public class EventsAdmin {
@@ -36,58 +37,80 @@ public class EventsAdmin {
     // +
     @POST
     @Produces("application/json")
-    public void addEventsAdmin(String eventDataJSON) {
+    @Consumes("application/json")
+    public Response addEventsAdmin(Event event) {
 
-        Event userEvent = jsonb.fromJson(eventDataJSON, Event.class);
+    
+        try {
+            eventsService.addEvent(event);
+            return Response.ok("{\n\"status\": true\n}").build();
 
-        eventsService.addEvent(userEvent);
+        } catch (Exception e) {
+            return Response.ok("{\n\"status\": false \n}\"").build();
+        }
 
         // добавить мероприятие
     }
 
     // +
-    @Path("/{eventID}")
     @DELETE
-    public void deleteEventsAdmin(@PathParam("eventID") Integer eventID) {
+    @Path("/{eventID}")
+    public Response deleteEventsAdmin(@PathParam("eventID") Integer eventID) {
 
-        eventsService.deleteEvent(eventID);
+        
+        try {
+            eventsService.deleteEvent(eventID);
+            return Response.ok("{\n\"status\": true\n}").build();
+
+        } catch (Exception e) {
+            return Response.ok("{\n\"status\": false\n}").build();
+
+            // TODO: handle exception
+        }
 
         // удалить мероприятие
+
     }
 
     // +
     @PUT
     @Produces("application/json")
-    @Path("/{eventID}")
-    public void changeEventInfoAdmin(@PathParam("eventID") Integer eventID, String eventDataJSON) {
+    @Consumes("application/json")
+    public Response changeEventInfoAdmin(Event event) {
 
         // изменить информацию о мероприятии
+        
+        try {
+            eventsService.changeEventInfo(event.getEventID(), event);
+            return Response.ok("{\n\"status\": true \n}").build();
 
-        Event userEvent = jsonb.fromJson(eventDataJSON, Event.class);
-
-        eventsService.changeEventInfo(eventID, userEvent);
+        } catch (Exception e) {
+            return Response.ok("{\n\"status\": false \n}").build();
+        }
 
     }
 
-    // -
+    // +
     @GET
     @Produces("application/json")
     @Path("/{eventsID}/users")
     public Response getUsersByEvent(@PathParam("eventsID") Integer eventsID) {
-        
+
         // Получить пользователей по мероприятию
 
-        List<User> users = eventsService.receiveUsersByEvent(eventsID);
+        List<UserEvent> users = eventsService.receiveUsersByEvent(eventsID);
 
         if (users != null) {
-            for (User u : users) {
+            for (UserEvent u : users) {
 
                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()
-                        .add("id", u.getUserID())
-                        .add("lastName", u.getLastName() != null ? u.getLastName() : "")
-                        .add("name", u.getName() != null ? u.getName() : "")
-                        .add("patronymic", u.getPatronymic() != null ? u.getPatronymic() : "")
-                        .add("status", u.getStatus());
+                        .add("id", u.getUser().getUserID())
+                        .add("lastName", u.getUser().getLastName() != null ? u.getUser().getLastName() : "")
+                        .add("name", u.getUser().getName() != null ? u.getUser().getName() : "")
+                        .add("patronymic", u.getUser().getPatronymic() != null ? u.getUser().getPatronymic() : "")
+                        .add("isParticipant", u.getUser().getStatus())
+                        .add("stampParticipate", u.getStampParticipate() != null ? u.getStampParticipate() : false)
+                        .add("timeParticipate", u.getTimeParticipate() != null ? u.getTimeParticipate() : 0.0);
 
                 arrayBuilder.add(objBuilder);
             }
@@ -98,12 +121,17 @@ public class EventsAdmin {
         }
     }
 
-    // @PUT
-    // @Produces("application/json")
-    // @Path("/{eventsID}/participance")
-    // public Response changeInfoUserInEvents(@PathParam("eventsID") Integer
-    // eventsID, String eventDataJSON) {
+    @PUT
+    @Produces("application/json")
+    @Path("/{eventID}/participance")
+    @Consumes("application/json")
+    public Response changeInfoUserInEvents(@PathParam("eventID") Integer eventID, List<UserEvent> userEvent) {
+        for (UserEvent ue : userEvent) {
+            // UserEvent event = jsonb.fromJson(ue, UserEvent.class);
 
-    // return Response.ok("check users by events").build();
-    // }
+            return Response.ok(eventsService.saveInfoParticipance(eventID, ue)).build();
+        }
+
+        return Response.ok("check users by events").build();
+    }
 }

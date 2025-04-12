@@ -6,7 +6,6 @@ import local.arch.application.interfaces.event.IEventsService;
 import local.arch.application.interfaces.event.IStorageEvent;
 import local.arch.application.interfaces.event.IStorageEventUsing;
 import local.arch.domain.entities.Event;
-import local.arch.domain.entities.User;
 import local.arch.domain.entities.UserEvent;
 
 public class EventsService implements IEventsService, IStorageEventUsing {
@@ -26,7 +25,6 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     @Override
     public List<Event> receiveFutureEventsUser(Integer userID) {
         return storageEvent.receiveFutureEventsUser(userID);
-
     }
 
     @Override
@@ -60,19 +58,17 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     }
 
     @Override
-    public List<User> receiveUsersByEvent(Integer eventID) {
+    public List<UserEvent> receiveUsersByEvent(Integer eventID) {
         return storageEvent.receiveUsersByEvent(eventID);
+    }
+
+    @Override
+    public String saveInfoParticipance(Integer eventID, UserEvent ue) {
+       return storageEvent.saveInfoParticipance(eventID, ue);
     }
 
     @Override
     public void useStorage(IStorageEvent storageEvent) {
         this.storageEvent = storageEvent;
     }
-
-    @Override
-    public String saveInfoParticipance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'saveInfoParticipance'");
-    }
-
 }

@@ -11,6 +11,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
+
 import local.arch.application.interfaces.user.IStorageUser;
 import local.arch.domain.entities.User;
 import local.arch.infrastructure.storage.model.EPoints;
@@ -70,13 +71,18 @@ public class UserPsqlJPA implements IStorageUser {
 
     @Override
     public String loginUser(User user) {
+        // entityManager.refresh();
+        entityManager.clear();
         String queryString = "SELECT p FROM EUser p WHERE p.login = :login";
 
         TypedQuery<EUser> query = entityManager.createQuery(queryString, EUser.class);
-        query.setParameter("login", user.getLogin());
+        query.setParameter("login", user.getLogin())
+        .setHint("javax.persistence.cache.retrieveMode", "BYPASS")
+        .setHint("javax.persistence.cache.storeMode", "BYPASS");
 
         try {
             EUser existingUser = query.getSingleResult();
+        
 
             if (BCrypt.verifyer().verify(user.getPassword().toCharArray(), existingUser.getPassword()).verified) {
                 return "{ \n \"status\": true, \n\"message\": \"Успешный вход\",\n\"id\": " + existingUser.getIdUser()
@@ -111,11 +117,6 @@ public class UserPsqlJPA implements IStorageUser {
     @Transactional
     public void updateUserData(User user) {
         EUser result = entityManager.find(EUser.class, user.getUserID());
-
-        // EUser results = entityManager.createQuery(
-        // "SELECT p FROM EUser p where p.idUser = :id", EUser.class)
-        // .setParameter("id", user.getIdUser())
-        // .getSingleResult();
 
         result.setAgeStamp(user.getAgeStamp());
         result.setClothingSize(user.getClothingSize());
