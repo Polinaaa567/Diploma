@@ -15,7 +15,7 @@ import local.arch.infrastructure.builder.user_annotation.BuiltUser;
 
 @Path("/auth")
 public class Auth {
-    
+
     private Jsonb jsonb = JsonbBuilder.create();
 
     @Inject
@@ -25,11 +25,10 @@ public class Auth {
     // +
     @POST
     @Produces("application/json")
-    @Consumes("application/json")
     @Path("/register")
-    public Response registration(User user) {
+    public Response registration(String userInfoRegJSON) {
 
-        // User user = jsonb.fromJson(userInfoRegJSON, User.class);
+        User user = jsonb.fromJson(userInfoRegJSON, User.class);
 
         return Response.ok(userService.registrationUser(user)).build();
     }

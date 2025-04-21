@@ -1,5 +1,7 @@
 package local.arch.infrastructure.controller.event;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
@@ -22,6 +24,16 @@ import local.arch.infrastructure.builder.event_annotation.BuiltEvent;
 @Path("/events")
 public class Events {
 
+    public String formatDate(Calendar date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        return sdf.format(date.getTime());
+    }
+
+    public String formatDate2(Calendar date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm");
+        return sdf.format(date.getTime());
+    }
+    
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
     @Inject
@@ -40,7 +52,7 @@ public class Events {
 
             JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                     .add("id", event.getEventID())
-                    .add("date", event.getDate().toString())
+                    .add("date", formatDate(event.getDateC()))
                     .add("name", event.getName())
                     .add("description", event.getDescription())
                     .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
@@ -60,6 +72,7 @@ public class Events {
     public Response getPastUsersEvents(@QueryParam("userID") Integer userID) {
 
         // Список прошедших мероприятий пользователя
+
         try {
             List<Event> ev = eventsService.receivePastEventsUser(userID);
 
@@ -67,7 +80,7 @@ public class Events {
 
                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                         .add("id", event.getEventID())
-                        .add("date", event.getDate().toString())
+                        .add("date", formatDate(event.getDateC()))
                         .add("name", event.getName())
                         .add("description", event.getDescription())
                         .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
@@ -101,7 +114,7 @@ public class Events {
 
                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                         .add("id", event.getEventID())
-                        .add("date", event.getDate().toString())
+                        .add("date", formatDate(event.getDateC()))
                         .add("name", event.getName())
                         .add("description", event.getDescription())
                         .add("image", event.getImage() != null ? event.getImage().toString() : "[]");
@@ -128,7 +141,8 @@ public class Events {
         Event event = eventsService.receiveEventInfo(userEvent);
 
         JsonObjectBuilder objBuilder = Json.createObjectBuilder()
-                .add("date", event.getDate().toString())
+                .add("date", formatDate(event.getDateC()))
+                .add("dateC", formatDate2(event.getDateC()))
                 .add("name", event.getName().toString())
                 .add("description", event.getDescription().toString())
                 .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
@@ -146,7 +160,7 @@ public class Events {
         return Response.ok(objBuilder.build()).build();
     }
 
-    // + -
+    // +
     @POST
     @Produces("application/json")
     @Consumes("application/json")

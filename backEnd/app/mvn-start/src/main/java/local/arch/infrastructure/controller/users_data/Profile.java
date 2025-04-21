@@ -3,8 +3,6 @@ package local.arch.infrastructure.controller.users_data;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -19,8 +17,6 @@ import local.arch.infrastructure.builder.user_annotation.BuiltUser;
 
 @Path("/profile/users")
 public class Profile {
-
-    private Jsonb jsonb = JsonbBuilder.create();
 
     @Inject
     @BuiltUser

@@ -37,6 +37,7 @@ public class NewsPsqlJPA implements IStorageNews {
     @Override
     @Transactional
     public void deleteNews(Integer newsID) {
+        
         ENews news = entityManager.find(ENews.class, newsID);
 
         entityManager.remove(news);

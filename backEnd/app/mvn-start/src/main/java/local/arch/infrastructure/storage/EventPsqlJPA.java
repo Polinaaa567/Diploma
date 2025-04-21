@@ -29,11 +29,7 @@ public class EventPsqlJPA implements IStorageEvent {
 
     Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
     Calendar calendar = Calendar.getInstance();
-
-    public String formatDate(Calendar date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        return sdf.format(date.getTime());
-    }
+    
 
     @PersistenceContext(unitName = "Volunteering")
     private EntityManager entityManager;
@@ -51,7 +47,7 @@ public class EventPsqlJPA implements IStorageEvent {
         for (Object[] result : results) {
             Event event = new Event();
             event.setEventID((Integer) result[0]);
-            event.setDate(formatDate((Calendar) result[1]));
+            event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
             event.setImage((Byte[]) result[4]);
@@ -83,7 +79,7 @@ public class EventPsqlJPA implements IStorageEvent {
         for (Object[] result : results) {
             Event event = new Event();
             event.setEventID((Integer) result[0]);
-            event.setDate(formatDate((Calendar) result[1]));
+            event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
             event.setImage((Byte[]) result[4]);
@@ -111,7 +107,7 @@ public class EventPsqlJPA implements IStorageEvent {
         for (Object[] result : results) {
             Event event = new Event();
             event.setEventID((Integer) result[0]);
-            event.setDate(formatDate((Calendar) result[1]));
+            event.setDateC(((Calendar) result[1]));
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
             event.setImage((Byte[]) result[4]);
@@ -139,7 +135,7 @@ public class EventPsqlJPA implements IStorageEvent {
                 : 0;
 
         Event event = new Event();
-        event.setDate(formatDate((Calendar) events.getDateEvent()));
+        event.setDateC((Calendar) events.getDateEvent());
         event.setName(events.getNameEvent());
         event.setDescription(events.getDescriptionEvent());
         event.setImage(events.getImage());
@@ -191,10 +187,10 @@ public class EventPsqlJPA implements IStorageEvent {
             EEvent events = entityManager.find(EEvent.class, userEvent.getEventID());
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
-            // if (user.getClothingSize() != null
-            // && user.getFirstName() != null
-            // && user.getLastName() != null
-            // && user.getAgeStamp() != null) {
+            if (user.getClothingSize() != null
+            && user.getFirstName() != null
+            && user.getLastName() != null
+            && user.getAgeStamp() != null) {
 
             LocalDateTime localDateTime = LocalDateTime.now();
             Timestamp timestamp = Timestamp.valueOf(localDateTime);
@@ -262,10 +258,9 @@ public class EventPsqlJPA implements IStorageEvent {
                 return "{\n \"status\": true, \n\"message\": \"Вы уже записаны на мероприятие\"\n}";
             }
 
-            // } else {
-            // return "{\n\"status\": false, \n\"message\": \"Не все данные о пользователе
-            // заполнены\"" + "\n}";
-            // }
+            } else {
+            return "{\n\"status\": false, \n\"message\": \"Не все данные о пользователе заполнены\"" + "\n}";
+            }
         } catch (Exception e) {
             return "{\n \"status\": false, \n\"message\": \"" + e + "\"\n}";
         }

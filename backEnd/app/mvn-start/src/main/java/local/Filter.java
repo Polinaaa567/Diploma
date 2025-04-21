@@ -14,7 +14,7 @@ public class Filter implements ContainerResponseFilter {
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
         responseContext.getHeaders().putSingle("Access-Control-Allow-Credentials", "true");
-        responseContext.getHeaders().putSingle("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
+        responseContext.getHeaders().putSingle("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         responseContext.getHeaders().putSingle("Access-Control-Allow-Headers", "accept, authorization, content-type, x-requested-with");
     }
 }

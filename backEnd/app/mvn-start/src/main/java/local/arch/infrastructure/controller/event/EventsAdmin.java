@@ -1,4 +1,4 @@
-package local.arch.infrastructure.controller.event;
+ package local.arch.infrastructure.controller.event;
 
 import java.util.List;
 
@@ -6,17 +6,19 @@ import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+
 import local.arch.application.interfaces.event.IEventsService;
 import local.arch.domain.entities.Event;
 import local.arch.domain.entities.UserEvent;
@@ -25,7 +27,6 @@ import local.arch.infrastructure.builder.event_annotation.BuiltEvent;
 @Path("/admin/events")
 public class EventsAdmin {
 
-    private Jsonb jsonb = JsonbBuilder.create();
     StringBuilder eventJson = new StringBuilder();
 
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -38,17 +39,15 @@ public class EventsAdmin {
     @POST
     @Produces("application/json")
     @Consumes("application/json")
-    public Response addEventsAdmin(Event event) {
+    public Response addEventsAdmin(@Valid Event event) {
 
-    
         try {
             eventsService.addEvent(event);
-            return Response.ok("{\n\"status\": true\n}").build();
+            return Response.ok().build();
 
-        } catch (Exception e) {
-            return Response.ok("{\n\"status\": false \n}\"").build();
+        } catch (ConstraintViolationException e) {
+            throw e;
         }
-
         // добавить мероприятие
     }
 
@@ -56,16 +55,18 @@ public class EventsAdmin {
     @DELETE
     @Path("/{eventID}")
     public Response deleteEventsAdmin(@PathParam("eventID") Integer eventID) {
+        if (eventID != null) {
+            try {
+                eventsService.deleteEvent(eventID);
+                return Response.ok("{\n\"status\": true \n}").build();
 
-        
-        try {
-            eventsService.deleteEvent(eventID);
-            return Response.ok("{\n\"status\": true\n}").build();
-
-        } catch (Exception e) {
-            return Response.ok("{\n\"status\": false\n}").build();
-
-            // TODO: handle exception
+            } catch (NotFoundException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity("{\"status\": false, \n\"message\": \"Мероприятие не найдена\" \n}").build();
+            } catch (Exception e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\n\"status\": false, \n\"message\": \"Внутренняя ошибка сервера\" \n}").build();
+            }
+        } else {
+            return Response.ok("{\n\"status\": false \n\"message\": \"Неверный ID\" \n}").build();
         }
 
         // удалить мероприятие
@@ -76,15 +77,15 @@ public class EventsAdmin {
     @PUT
     @Produces("application/json")
     @Consumes("application/json")
-    public Response changeEventInfoAdmin(Event event) {
+    public Response changeEventInfoAdmin(@Valid Event event) {
 
         // изменить информацию о мероприятии
-        
+
         try {
             eventsService.changeEventInfo(event.getEventID(), event);
-            return Response.ok("{\n\"status\": true \n}").build();
+            return Response.ok().build();
 
-        } catch (Exception e) {
+        } catch (ConstraintViolationException e) {
             return Response.ok("{\n\"status\": false \n}").build();
         }
 
@@ -117,21 +118,35 @@ public class EventsAdmin {
 
             return Response.ok(arrayBuilder.build()).build();
         } else {
-            return Response.ok("{\n\"status\": false\n}").build();
+            return Response.ok("[]").build();
         }
     }
 
     @PUT
     @Produces("application/json")
-    @Path("/{eventID}/participance")
     @Consumes("application/json")
+    @Path("/{eventID}/participance")
     public Response changeInfoUserInEvents(@PathParam("eventID") Integer eventID, List<UserEvent> userEvent) {
-        for (UserEvent ue : userEvent) {
-            // UserEvent event = jsonb.fromJson(ue, UserEvent.class);
 
-            return Response.ok(eventsService.saveInfoParticipance(eventID, ue)).build();
+        try {
+            for (UserEvent ue : userEvent) {
+                eventsService.saveInfoParticipance(eventID, ue);
+            }
+            return Response.ok("check users by events").build();
+        } catch (Exception e) {
+            return Response.ok("check users by events").build();
         }
-
-        return Response.ok("check users by events").build();
     }
+
+    // [
+    // {
+    // "userID": 2,
+    // "stampParticipate": true,
+    // "timeParticipate": 2
+    // }, {
+    // "userID": 3,
+    // "stampParticipate": true,
+    // "timeParticipate": 6.5
+    // }
+    // ]
 }
