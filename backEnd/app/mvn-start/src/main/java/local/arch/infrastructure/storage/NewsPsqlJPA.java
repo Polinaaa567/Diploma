@@ -2,16 +2,16 @@ package local.arch.infrastructure.storage;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+
 import local.arch.application.interfaces.news.IStorageNews;
 import local.arch.domain.entities.News;
-import local.arch.infrastructure.storage.model.EImageNews;
 import local.arch.infrastructure.storage.model.ENews;
 
 public class NewsPsqlJPA implements IStorageNews {

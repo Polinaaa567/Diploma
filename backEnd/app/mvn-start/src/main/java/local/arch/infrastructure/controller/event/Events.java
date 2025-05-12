@@ -33,7 +33,7 @@ public class Events {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm");
         return sdf.format(date.getTime());
     }
-    
+
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
     @Inject
@@ -55,9 +55,13 @@ public class Events {
                     .add("date", formatDate(event.getDateC()))
                     .add("name", event.getName())
                     .add("description", event.getDescription())
-                    .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
+                    .add("image", event.getImage() != null
+                            ? event.getImage().toString()
+                            : "[]")
                     .add("isRelevance", event.getIsRelevance())
-                    .add("isParticipation", event.getIsParticipation() != null ? event.getIsParticipation() : false);
+                    .add("isParticipation", event.getIsParticipation() != null
+                            ? event.getIsParticipation()
+                            : false);
 
             arrayBuilder.add(objBuilder);
         }
@@ -83,11 +87,16 @@ public class Events {
                         .add("date", formatDate(event.getDateC()))
                         .add("name", event.getName())
                         .add("description", event.getDescription())
-                        .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
-                        .add("stampParticipate",
-                                event.getStampParticipate() != null ? event.getStampParticipate() : false)
-                        .add("timeParticipate",
-                                event.getTimeParticipate() != null ? event.getTimeParticipate() : 0.0);
+                        .add("image", event.getImage() != null
+                                ? event.getImage().toString()
+                                : "[]")
+                        .add("stampParticipate", event.getStampParticipate() != null
+                                ? event.getStampParticipate()
+                                : false)
+                        .add("timeParticipate", event.getTimeParticipate() != null
+                                ? event.getTimeParticipate()
+                                : 0.0);
+
                 arrayBuilder.add(objBuilder);
             }
 
@@ -95,7 +104,6 @@ public class Events {
 
         } catch (Exception e) {
             return Response.ok("Ошибка: " + e).build();
-
         }
     }
 
@@ -117,7 +125,9 @@ public class Events {
                         .add("date", formatDate(event.getDateC()))
                         .add("name", event.getName())
                         .add("description", event.getDescription())
-                        .add("image", event.getImage() != null ? event.getImage().toString() : "[]");
+                        .add("image", event.getImage() != null
+                                ? event.getImage().toString()
+                                : "[]");
 
                 arrayBuilder.add(objBuilder);
             }
@@ -145,17 +155,32 @@ public class Events {
                 .add("dateC", formatDate2(event.getDateC()))
                 .add("name", event.getName().toString())
                 .add("description", event.getDescription().toString())
-                .add("image", event.getImage() != null ? event.getImage().toString() : "[]")
+                .add("image", event.getImage() != null
+                        ? event.getImage().toString()
+                        : "[]")
                 .add("status", event.getStatusParticipate())
-                .add("address", event.getAddress() != null ? event.getAddress().toString() : "")
-                .add("format", event.getFormat() != null ? event.getFormat().toString() : "")
-                .add("type", event.getType() != null ? event.getType().toString() : "")
-                .add("maxCountParticipants",
-                        event.getMaxCountParticipants() != null ? event.getMaxCountParticipants() : 0)
+                .add("address", event.getAddress() != null
+                        ? event.getAddress().toString()
+                        : "")
+                .add("format", event.getFormat() != null
+                        ? event.getFormat().toString()
+                        : "")
+                .add("type", event.getType() != null
+                        ? event.getType().toString()
+                        : "")
+                .add("maxCountParticipants", event.getMaxCountParticipants() != null
+                        ? event.getMaxCountParticipants()
+                        : 0)
                 .add("countParticipants", event.getNumberParticipants())
-                .add("age", event.getAge() != null ? event.getAge() : 16)
-                .add("points", event.getPoints() != null ? event.getPoints() : 0)
-                .add("linkDobroRF", event.getLinkDobroRF() != null ? event.getLinkDobroRF() : "");
+                .add("age", event.getAge() != null
+                        ? event.getAge()
+                        : 16)
+                .add("points", event.getPoints() != null
+                        ? event.getPoints()
+                        : 0)
+                .add("linkDobroRF", event.getLinkDobroRF() != null
+                        ? event.getLinkDobroRF()
+                        : "");
 
         return Response.ok(objBuilder.build()).build();
     }
@@ -187,5 +212,34 @@ public class Events {
         String ev = eventsService.deleteUsersEvent(userEvent);
 
         return Response.ok(ev).build();
+    }
+
+    @GET
+    @Produces("application/json")
+    @Consumes("application/json")
+    @Path("/range")
+    public Response eventsBetwenDate(@QueryParam("dateStart") String dateStart, @QueryParam("dateEnd") String dateEnd) {
+
+        List<Event> events = eventsService.eventsBetwenDate(dateStart, dateEnd);
+
+        for (Event event : events) {
+
+            JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                    .add("id", event.getEventID())
+                    .add("date", formatDate(event.getDateC()))
+                    .add("name", event.getName())
+                    .add("description", event.getDescription())
+                    .add("image", event.getImage() != null
+                            ? event.getImage().toString()
+                            : "[]")
+                    .add("isRelevance", event.getIsRelevance())
+                    .add("isParticipation", event.getIsParticipation() != null
+                            ? event.getIsParticipation()
+                            : false);
+
+            arrayBuilder.add(objBuilder);
+        }
+
+        return Response.ok(arrayBuilder.build()).build();
     }
 }

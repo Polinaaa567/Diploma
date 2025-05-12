@@ -12,16 +12,16 @@ import lombok.Setter;
 @Setter
 public class Event {
     private Integer eventID;
-    
-    @NotBlank(message="Название не должно быть пустым")
+
+    @NotBlank(message = "Название не должно быть пустым")
     private String name;
 
-    @NotBlank(message="Описание не должно быть пустым")
+    @NotBlank(message = "Описание не должно быть пустым")
     private String description;
 
     private Calendar dateC;
 
-    @NotBlank(message="Дата проведения мероприятия не должна быть пустой")
+    @NotBlank(message = "Дата проведения мероприятия не должна быть пустой")
     private String date;
 
     @DefaultValue("Пр. Советский 73, к.2, л.1")
@@ -70,6 +70,7 @@ public class Event {
     }
 
     private Integer age;
+
     public void setAge(Integer age) {
         if (age == null) {
             this.age = 16;
@@ -79,6 +80,7 @@ public class Event {
     }
 
     private Integer points = 50;
+
     public void setPoints(Integer points) {
         if (points == null) {
             this.points = 50;
@@ -108,4 +110,8 @@ public class Event {
     private String message;
 
     private Boolean isParticipation;
+
+    private String dateStart;
+
+    private String dateEnd;
 }

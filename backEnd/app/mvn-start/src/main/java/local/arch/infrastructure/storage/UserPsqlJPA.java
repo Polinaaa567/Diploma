@@ -2,9 +2,11 @@ package local.arch.infrastructure.storage;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 import java.util.List;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -14,7 +16,6 @@ import jakarta.transaction.Transactional;
 
 import local.arch.application.interfaces.user.IStorageUser;
 import local.arch.domain.entities.User;
-import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.ERole;
 import local.arch.infrastructure.storage.model.EUser;
 
@@ -57,11 +58,11 @@ public class UserPsqlJPA implements IStorageUser {
             newUser.setDateCreation(timestamp);
             entityManager.persist(newUser);
 
-            EPoints newUserPoints = new EPoints();
-            newUserPoints.setDateChange(timestamp);
-            newUserPoints.setFkUserID(newUser);
-            newUserPoints.setPoints(1);
-            entityManager.persist(newUserPoints);
+            // EPoints newUserPoints = new EPoints();
+            // newUserPoints.setDateChange(timestamp);
+            // newUserPoints.setFkUserID(newUser);
+            // newUserPoints.setPoints(1);
+            // entityManager.persist(newUserPoints);
 
             return "{ \n \"status\": true,\n\"message\":\"Регистрация прошла успешно\", \n\"id\": "
                     + newUser.getIdUser() + "\n}";
@@ -71,18 +72,14 @@ public class UserPsqlJPA implements IStorageUser {
 
     @Override
     public String loginUser(User user) {
-        // entityManager.refresh();
         entityManager.clear();
         String queryString = "SELECT p FROM EUser p WHERE p.login = :login";
 
         TypedQuery<EUser> query = entityManager.createQuery(queryString, EUser.class);
-        query.setParameter("login", user.getLogin())
-        .setHint("javax.persistence.cache.retrieveMode", "BYPASS")
-        .setHint("javax.persistence.cache.storeMode", "BYPASS");
+        query.setParameter("login", user.getLogin());
 
         try {
             EUser existingUser = query.getSingleResult();
-        
 
             if (BCrypt.verifyer().verify(user.getPassword().toCharArray(), existingUser.getPassword()).verified) {
                 return "{ \n \"status\": true, \n\"message\": \"Успешный вход\",\n\"id\": " + existingUser.getIdUser()
@@ -101,7 +98,7 @@ public class UserPsqlJPA implements IStorageUser {
         EUser result = entityManager.find(EUser.class, idUser);
 
         User user = new User();
-        
+
         user.setAgeStamp(result.getAgeStamp());
         user.setClothingSize(result.getClothingSize());
         user.setName(result.getFirstName());
@@ -130,8 +127,10 @@ public class UserPsqlJPA implements IStorageUser {
     }
 
     @Override
-    public List<User> receiveUserRating() {
-        // TODO Auto-generated method stub
+    public List<User> receiveUserRating(Integer userID) {
+        
+        
+        
         throw new UnsupportedOperationException("Unimplemented method 'receiveUserRating'");
     }
 
@@ -153,3 +152,16 @@ public class UserPsqlJPA implements IStorageUser {
         throw new UnsupportedOperationException("Unimplemented method 'changeUserPasswd'");
     }
 }
+
+// select u.id_user, (sum(e.number_points_event ) + sum(l.number_points)) as point, u.last_name, u.first_name , (
+//     SELECT Min(level_number)
+//     FROM levels 
+//     WHERE (sum(e.number_points_event ) + sum(l.number_points)) <= max_number_points
+// ) AS user_level
+// from users_points p 
+// left join events e on p.fk_event_id = e.event_id 
+// left join lessons l on p.fk_lesson_id = l.lesson_id 
+// left join users u on u.id_user = p.fk_user_id
+// group by p.fk_user_id, u.last_name, u.first_name, u.fk_role_id, u.id_user
+// having u.last_name IS NOT NULL and u.first_name IS NOT NULL and u.fk_role_id != 1
+// order by point desc;

@@ -10,10 +10,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,8 +46,9 @@ public class EEvent {
     @Column(name = "\"max_number_participants\"")
     private Integer maxNumberParticipants;
 
-    @Column(name = "\"event_type\"")
-    private String eventType;
+    @OneToOne
+    @JoinColumn(name = "\"fk_type\"", referencedColumnName = "\"id_type\"")
+    private EType eventType;
 
     @Column(name = "\"age_restrictions\"")
     private Integer ageRestrictions;
@@ -62,23 +66,23 @@ public class EEvent {
     @Column(name = "\"image\"")
     private Byte[] image;
 
-    @Column(name = "\"date_event\"", nullable=true)
+    @Column(name = "\"date_event\"", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar dateEvent;
 
     @Column(name = "\"is_participation\"")
     private Boolean isParticipation;
 
-    public EEvent() {}
+    public EEvent() {
+    }
 
-    public EEvent(Integer eventID, Calendar dateEvent, String nameEvent, 
-    String descriptionEvent, Byte[] image, boolean isParticipation) {
+    public EEvent(Integer eventID, Calendar dateEvent, String nameEvent,
+            String descriptionEvent, Byte[] image, boolean isParticipation) {
         this.eventID = eventID;
         this.dateEvent = dateEvent;
         this.nameEvent = nameEvent;
         this.descriptionEvent = descriptionEvent;
         this.image = image;
         this.isParticipation = isParticipation;
-        // this.isRelevance = dateEvent != null && dateEvent.compareTo(Calendar.getInstance()) > 1;
     }
 }

@@ -16,18 +16,17 @@ public class ValidationExceptionHandler implements ExceptionMapper<ConstraintVio
     @Override
     public Response toResponse(ConstraintViolationException exception) {
         List<ValidationError> errors = new ArrayList<>();
-        
+
         for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
             ValidationError error = new ValidationError();
             error.setStatus(false);
             error.setMessage(violation.getMessage());
             errors.add(error);
         }
-        
+
         return Response.status(Response.Status.BAD_REQUEST)
-                     .entity(errors)
-                     .type(MediaType.APPLICATION_JSON)
-                     .build();
+                .entity(errors)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
-    
 }

@@ -71,4 +71,14 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     public void useStorage(IStorageEvent storageEvent) {
         this.storageEvent = storageEvent;
     }
+
+    @Override
+    public List<Event> eventsBetwenDate(String dateStart, String dateEnd) {
+       return storageEvent.eventsBetwenDate(dateStart, dateEnd);
+    }
+
+    @Override
+    public List<String> getTypesEvents() {
+        return storageEvent.getTypesEvents();
+    }
 }

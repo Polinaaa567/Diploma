@@ -22,15 +22,23 @@ public class EPoints {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_points_user_points_id_seq")
     @SequenceGenerator(name = "users_points_user_points_id_seq", sequenceName = "users_points_user_points_id_seq", initialValue = 1, allocationSize = 1)
     @Column(name = "\"user_points_id\"")
-    private Integer idUP ;
+    private Integer idUP;
 
     @OneToOne
     @JoinColumn(name = "\"fk_user_id\"", referencedColumnName = "\"id_user\"")
     private EUser fkUserID;
 
     @Column(name = "\"points\"")
-    private Integer points ;
+    private Integer points;
 
     @Column(name = "\"date_change\"")
     private Timestamp dateChange;
+
+    @OneToOne
+    @JoinColumn(name = "\"fk_event_id\"", referencedColumnName = "\"event_id\"")
+    private EEvent fkEventID;
+
+    @OneToOne
+    @JoinColumn(name = "\"fk_lesson_id\"", referencedColumnName = "\"lesson_id\"")
+    private ELessons fkLessonID;
 }

@@ -5,11 +5,13 @@ import java.util.List;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 import local.arch.application.interfaces.education.IEducationService;
@@ -23,23 +25,60 @@ public class Education {
 
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
-    @Inject 
+    @Inject
     @BuiltEducation
     IEducationService educationService;
 
-    // -
+    // +
     @GET
     @Produces("application/json")
-    @Path("/{userID}")
-    public Response getAllLessonSheet(@PathParam("userID") Integer userID) {
+    public Response getAllLessonSheet(@QueryParam("userID") Integer userID, @QueryParam("lessonID") Integer lessonID) {
 
         // Получить список всех уроков
-        List<Lesson> lessons = educationService.receiveLessons(userID);
-        
-        return Response.ok(lessons).build();
+
+        if (lessonID == null) {
+            List<Lesson> lessons = educationService.receiveLessons(userID);
+            if (userID != null) {
+                for (Lesson l : lessons) {
+                    JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                            .add("id", l.getLessonID())
+                            .add("headline", l.getHeadline())
+                            .add("link", l.getLink())
+                            .add("description", l.getDescription() != null ? l.getDescription() : "null")
+                            .add("numberPoints", l.getNumberPoints())
+                            .add("status", l.getStatus());
+
+                    arrayBuilder.add(objBuilder);
+                }
+
+                return Response.ok(arrayBuilder.build()).build();
+            } else {
+                for (Lesson l : lessons) {
+                    JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                            .add("id", l.getLessonID())
+                            .add("headline", l.getHeadline())
+                            .add("link", l.getLink())
+                            .add("description", l.getDescription() != null ? l.getDescription() : "null");
+
+                    arrayBuilder.add(objBuilder);
+                }
+
+                return Response.ok(arrayBuilder.build()).build();
+            }
+
+        } else {
+            Lesson l = educationService.receiveLessonInfo(lessonID);
+            JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                    .add("headline", l.getHeadline())
+                    .add("link", l.getLink())
+                    .add("numberPoints", l.getNumberPoints())
+                    .add("description", l.getDescription() != null ? l.getDescription() : "null");
+
+            return Response.ok(objBuilder.build()).build();
+        }
     }
 
-    // -
+    // +
     @POST
     @Produces("application/json")
     @Path("/{userID}/{lessonID}")

@@ -12,7 +12,7 @@ public class UserService implements IUserService, IStorageUserUsing {
     IStorageUser storageUser;
 
     @Override
-    public List<User> receiveUserRating() {
+    public List<User> receiveUserRating(Integer userID) {
         return null;
     }
 

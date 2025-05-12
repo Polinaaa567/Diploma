@@ -27,4 +27,8 @@ public interface IStorageEvent {
     public List<UserEvent> receiveUsersByEvent(Integer eventID);
 
     public String saveInfoParticipance(Integer eventID, UserEvent ue);
+
+    public List<Event> eventsBetwenDate(String dateStart, String dateEnd);
+
+    public List<String> getTypesEvents();
 }

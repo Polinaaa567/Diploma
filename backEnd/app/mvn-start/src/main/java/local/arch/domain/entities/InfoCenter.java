@@ -10,7 +10,7 @@ public class InfoCenter {
 
     private String description;
     
-    private Byte imageData;
+    private String imageData;
     
     private String contacts;
     

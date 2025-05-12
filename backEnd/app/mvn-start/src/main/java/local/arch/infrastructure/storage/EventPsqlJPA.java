@@ -2,13 +2,14 @@ package local.arch.infrastructure.storage;
 
 import java.util.Date;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import com.github.wslf.levenshteindistance.LevenshteinCalculator;
 
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
@@ -21,6 +22,7 @@ import local.arch.domain.entities.User;
 import local.arch.infrastructure.storage.model.EUser;
 import local.arch.infrastructure.storage.model.EEvent;
 import local.arch.infrastructure.storage.model.EPoints;
+import local.arch.infrastructure.storage.model.EType;
 import local.arch.domain.entities.UserEvent;
 import local.arch.infrastructure.storage.model.EUserEvent;
 
@@ -29,7 +31,8 @@ public class EventPsqlJPA implements IStorageEvent {
 
     Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
     Calendar calendar = Calendar.getInstance();
-    
+
+    LevenshteinCalculator calculator = new LevenshteinCalculator();
 
     @PersistenceContext(unitName = "Volunteering")
     private EntityManager entityManager;
@@ -50,7 +53,7 @@ public class EventPsqlJPA implements IStorageEvent {
             event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            event.setImage((Byte[]) result[4]);
+            // event.setImage((Byte[]) result[4]);
             event.setIsRelevance(((Calendar) result[1]).compareTo(calendar) > 0
                     ? true
                     : false);
@@ -69,7 +72,8 @@ public class EventPsqlJPA implements IStorageEvent {
                 "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image, eu.stampParticipate, eu.timeParticipate "
                         + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
                         + "WHERE u.idUser = :id "
-                        + "and e.dateEvent < :timestamp",
+                        + "and e.dateEvent < :timestamp "
+                        + "order by e.dateEvent DESC",
                 Object[].class)
                 .setParameter("id", userID)
                 .setParameter("timestamp", timestamp)
@@ -82,7 +86,7 @@ public class EventPsqlJPA implements IStorageEvent {
             event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            event.setImage((Byte[]) result[4]);
+            // event.setImage((Byte[]) result[4]);
             event.setStampParticipate((Boolean) result[5]);
             event.setTimeParticipate((Double) result[6]);
 
@@ -97,7 +101,8 @@ public class EventPsqlJPA implements IStorageEvent {
                 "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image "
                         + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
                         + "WHERE u.idUser = :id "
-                        + "and e.dateEvent > :timestamp",
+                        + "and e.dateEvent > :timestamp " 
+                        + "order by e.dateEvent",
                 Object[].class)
                 .setParameter("id", userID)
                 .setParameter("timestamp", timestamp)
@@ -110,7 +115,7 @@ public class EventPsqlJPA implements IStorageEvent {
             event.setDateC(((Calendar) result[1]));
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            event.setImage((Byte[]) result[4]);
+            // event.setImage((Byte[]) result[4]);
 
             events.add(event);
         }
@@ -138,7 +143,7 @@ public class EventPsqlJPA implements IStorageEvent {
         event.setDateC((Calendar) events.getDateEvent());
         event.setName(events.getNameEvent());
         event.setDescription(events.getDescriptionEvent());
-        event.setImage(events.getImage());
+        // event.setImage(events.getImage());
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(Date.from(timestamp.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
@@ -171,7 +176,7 @@ public class EventPsqlJPA implements IStorageEvent {
         event.setAddress(events.getAddressEvent());
         event.setFormat(events.getEventFormat());
         event.setMaxCountParticipants(events.getMaxNumberParticipants());
-        event.setType(events.getEventType());
+        event.setType(events.getEventType() != null ? events.getEventType().getName() : "Другое");
         event.setAge(events.getAgeRestrictions());
         event.setPoints(events.getNumberPointsEvent());
         event.setNumberParticipants(count);
@@ -185,44 +190,61 @@ public class EventPsqlJPA implements IStorageEvent {
     public String signUpForEvent(UserEvent userEvent) {
         try {
             EEvent events = entityManager.find(EEvent.class, userEvent.getEventID());
+
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
             if (user.getClothingSize() != null
-            && user.getFirstName() != null
-            && user.getLastName() != null
-            && user.getAgeStamp() != null) {
+                    && user.getFirstName() != null
+                    && user.getLastName() != null
+                    && user.getAgeStamp() != null) {
 
-            LocalDateTime localDateTime = LocalDateTime.now();
-            Timestamp timestamp = Timestamp.valueOf(localDateTime);
+                LocalDateTime localDateTime = LocalDateTime.now();
+                Timestamp timestamp = Timestamp.valueOf(localDateTime);
 
-            EUserEvent eu = new EUserEvent();
-            eu.setFkEventID(events);
-            eu.setFkUserID(user);
-            eu.setDateCreation(timestamp);
+                EUserEvent eu = new EUserEvent();
+                eu.setFkEventID(events);
+                eu.setFkUserID(user);
+                eu.setDateCreation(timestamp);
 
-            Integer count = entityManager.createQuery(
-                    "SELECT p "
-                            + "FROM EUserEvent p "
-                            + "where p.fkEventID = :id",
-                    EUserEvent.class)
-                    .setParameter("id", events)
-                    .getResultList().size();
+                Integer count = entityManager.createQuery(
+                        "SELECT p "
+                                + "FROM EUserEvent p "
+                                + "where p.fkEventID = :id",
+                        EUserEvent.class)
+                        .setParameter("id", events)
+                        .getResultList().size();
 
-            List<EUserEvent> existingEUserEvent = entityManager.createQuery(
-                    "SELECT p "
-                            + "FROM EUserEvent p "
-                            + "where p.fkEventID = :idE and p.fkUserID = :idU",
-                    EUserEvent.class)
-                    .setParameter("idE", events)
-                    .setParameter("idU", user)
-                    .getResultList();
+                List<EUserEvent> existingEUserEvent = entityManager.createQuery(
+                        "SELECT p "
+                                + "FROM EUserEvent p "
+                                + "where p.fkEventID = :idE and p.fkUserID = :idU",
+                        EUserEvent.class)
+                        .setParameter("idE", events)
+                        .setParameter("idU", user)
+                        .getResultList();
 
-            if (existingEUserEvent.isEmpty()) {
-                if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
-                    if (events.getMaxNumberParticipants() - count <= 0) {
-                        return "{\n\"status\": true, \n\"message\": \"Кол-во мест на мероприятие закончилось\","
-                                + " \n\"countParticipants\": " + count
-                                + "\n}";
+                if (existingEUserEvent.isEmpty()) {
+                    if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
+                        if (events.getMaxNumberParticipants() - count <= 0) {
+                            return "{\n\"status\": true, \n\"message\": \"Кол-во мест на мероприятие закончилось\","
+                                    + " \n\"countParticipants\": " + count
+                                    + "\n}";
+                        } else {
+
+                            entityManager.persist(eu);
+
+                            Integer number = entityManager.createQuery(
+                                    "SELECT p "
+                                            + "FROM EUserEvent p "
+                                            + "where p.fkEventID = :id",
+                                    EUserEvent.class)
+                                    .setParameter("id", events)
+                                    .getResultList().size();
+                            return "{\n\"status\": true, \n\"message\": \"Успешная регистрация на мероприятие\","
+                                    + " \n\"countParticipants\": " + number
+                                    + "\n}";
+                        }
+
                     } else {
 
                         entityManager.persist(eu);
@@ -234,32 +256,16 @@ public class EventPsqlJPA implements IStorageEvent {
                                 EUserEvent.class)
                                 .setParameter("id", events)
                                 .getResultList().size();
-                        return "{\n\"status\": true, \n\"message\": \"Успешная регистрация на мероприятие\","
+                        return "{\n\"status\": true, \n\"message\": \"Успешная решистрация на мероприятие\","
                                 + " \n\"countParticipants\": " + number
                                 + "\n}";
                     }
-
                 } else {
-
-                    entityManager.persist(eu);
-
-                    Integer number = entityManager.createQuery(
-                            "SELECT p "
-                                    + "FROM EUserEvent p "
-                                    + "where p.fkEventID = :id",
-                            EUserEvent.class)
-                            .setParameter("id", events)
-                            .getResultList().size();
-                    return "{\n\"status\": true, \n\"message\": \"Успешная решистрация на мероприятие\","
-                            + " \n\"countParticipants\": " + number
-                            + "\n}";
+                    return "{\n \"status\": true, \n\"message\": \"Вы уже записаны на мероприятие\"\n}";
                 }
-            } else {
-                return "{\n \"status\": true, \n\"message\": \"Вы уже записаны на мероприятие\"\n}";
-            }
 
             } else {
-            return "{\n\"status\": false, \n\"message\": \"Не все данные о пользователе заполнены\"" + "\n}";
+                return "{\n\"status\": false, \n\"message\": \"Не все данные о пользователе заполнены\"" + "\n}";
             }
         } catch (Exception e) {
             return "{\n \"status\": false, \n\"message\": \"" + e + "\"\n}";
@@ -271,6 +277,7 @@ public class EventPsqlJPA implements IStorageEvent {
     public String deleteUsersEvent(UserEvent userEvent) {
         try {
             EEvent events = entityManager.find(EEvent.class, userEvent.getEventID());
+
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
             List<EUserEvent> query = entityManager.createQuery(
@@ -301,18 +308,41 @@ public class EventPsqlJPA implements IStorageEvent {
     public void addEvent(Event data) {
         EEvent ev = new EEvent();
 
+        List<EType> types = entityManager.createQuery("Select p from EType p", EType.class).getResultList();
+
+        EType type = null;
+
+        for (EType t : types) {
+            Integer distance = calculator.getLevenshteinDistance(t.getName().toLowerCase(),
+                    data.getType().toLowerCase());
+
+            if (distance <= 2) {
+                type = t;
+                break;
+            }
+        }
+
+        if (type == null && data.getType() != null) {
+            EType newType = new EType();
+            newType.setName(data.getType().substring(0, 1).toUpperCase() + data.getType().substring(1).toLowerCase());
+            entityManager.persist(newType);
+
+            type = newType;
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         LocalDateTime localDateTime = LocalDateTime.parse(data.getDate(), formatter);
         calendar.setTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
-        
+
         ev.setAddressEvent(data.getAddress());
         ev.setAgeRestrictions(data.getAge());
         ev.setDateCreation(timestamp);
         ev.setDateEvent(calendar);
         ev.setDescriptionEvent(data.getDescription());
         ev.setEventFormat(data.getFormat());
-        ev.setEventType(data.getType());
-        ev.setImage(data.getImage());
+        ev.setEventType(type);
+        // ev.setImage(data.getImage());
+        // ev.setImage(Byte[]);
         ev.setLinkDobroRF(data.getLinkDobroRF());
         ev.setMaxNumberParticipants(data.getMaxCountParticipants());
         ev.setNameEvent(data.getName());
@@ -343,13 +373,35 @@ public class EventPsqlJPA implements IStorageEvent {
         LocalDateTime localDateTime = LocalDateTime.parse(data.getDate(), formatter);
         calendar.setTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 
+        List<EType> types = entityManager.createQuery("Select p from EType p", EType.class).getResultList();
+
+        EType type = null;
+
+        for (EType t : types) {
+            Integer distance = calculator.getLevenshteinDistance(t.getName().toLowerCase(),
+                    data.getType().toLowerCase());
+
+            if (distance <= 2) {
+                type = t;
+                break;
+            }
+        }
+
+        if (type == null && data.getType() != null) {
+            EType newType = new EType();
+            newType.setName(data.getType().substring(0, 1).toUpperCase() + data.getType().substring(1).toLowerCase());
+            entityManager.persist(newType);
+
+            type = newType;
+        }
+
         ev.setAddressEvent(data.getAddress());
         ev.setAgeRestrictions(data.getAge());
         ev.setDateEvent(calendar);
         ev.setDescriptionEvent(data.getDescription());
         ev.setEventFormat(data.getFormat());
-        ev.setEventType(data.getType());
-        ev.setImage(data.getImage());
+        ev.setEventType(type);
+        // ev.setImage(data.getImage());
         ev.setLinkDobroRF(data.getLinkDobroRF());
         ev.setMaxNumberParticipants(data.getMaxCountParticipants());
         ev.setNameEvent(data.getName());
@@ -382,8 +434,7 @@ public class EventPsqlJPA implements IStorageEvent {
                 user.setPatronymic(ue.getFkUserID().getPatronymic());
                 user.setStatus(ue.getFkEventID().getDateEvent().compareTo(calendar) > 0
                         ? event.getIsParticipation()
-                        : false
-                );
+                        : false);
                 userEvent.setUser(user);
                 userEvent.setStampParticipate(ue.getStampParticipate());
                 userEvent.setTimeParticipate(ue.getTimeParticipate());
@@ -399,7 +450,9 @@ public class EventPsqlJPA implements IStorageEvent {
     public String saveInfoParticipance(Integer eventID, UserEvent ue) {
 
         EEvent event = entityManager.find(EEvent.class, eventID);
+
         EUser user = entityManager.find(EUser.class, ue.getUserID());
+
         EUserEvent userEvent = entityManager
                 .createQuery("Select p from EUserEvent p where p.fkUserID = :idU and p.fkEventID = :idE",
                         EUserEvent.class)
@@ -412,19 +465,81 @@ public class EventPsqlJPA implements IStorageEvent {
 
             event.setIsParticipation(true);
             entityManager.merge(event);
+            List<EPoints> isPoints = entityManager
+                    .createQuery("Select p from EPoints p where p.fkEventID = :idE and p.fkUserID = :idU",
+                            EPoints.class)
+                    .setParameter("idE", event)
+                    .setParameter("idU", user)
+                    .getResultList();
 
-            EPoints points = entityManager.createQuery("select p from EPoints p where p.fkUserID = :idU", EPoints.class)
-                    .setParameter("idU", user).getSingleResult();
+            EPoints points = new EPoints();
 
-            if (ue.getStampParticipate()) {
-                points.setPoints(points.getPoints() + event.getNumberPointsEvent());
-                entityManager.merge(points);
+            if (ue.getStampParticipate() && isPoints.isEmpty()) {
+                points.setPoints(event.getNumberPointsEvent());
+                points.setFkEventID(event);
+                points.setDateChange(timestamp);
+                points.setFkUserID(user);
+
+                entityManager.persist(points);
             }
 
             return "all completed";
         } catch (Exception e) {
             return "" + e;
         }
+    }
 
+    @Override
+    public List<Event> eventsBetwenDate(String dateStart, String dateEnd) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        LocalDateTime localDateTime = LocalDateTime.parse(dateStart, formatter);
+        Calendar calendarStart = Calendar.getInstance();
+        calendarStart.setTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+
+        LocalDateTime localDateTime2 = LocalDateTime.parse(dateEnd, formatter);
+        Calendar calendarEnd = Calendar.getInstance();
+        calendarEnd.setTime(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
+
+        List<EEvent> events = entityManager.createQuery(
+                "SELECT p "
+                        + "FROM EEvent p "
+                        + "WHERE p.dateEvent < :end "
+                        + "and p.dateEvent > :start",
+                EEvent.class)
+                .setParameter("start", calendarStart)
+                .setParameter("end", calendarEnd)
+                .getResultList();
+
+        List<Event> eventArray = new ArrayList<>();
+        for (EEvent event : events) {
+            Event e = new Event();
+            e.setEventID(event.getEventID());
+            e.setDateC(event.getDateEvent());
+            e.setName(event.getNameEvent());
+            e.setDescription(event.getDescriptionEvent());
+            // e.setImage(event.getImage());
+            e.setIsRelevance((event.getDateEvent()).compareTo(calendar) > 0
+                    ? true
+                    : false);
+            e.setIsParticipation(event.getIsParticipation());
+
+            eventArray.add(e);
+        }
+        return eventArray;
+    }
+
+    @Override
+    public List<String> getTypesEvents() {
+        List<EType> types = entityManager.createQuery("Select p from EType p", EType.class).getResultList();
+
+        List<String> typesArray = new ArrayList<>();
+
+        for (EType t : types) {
+            typesArray.add(t.getName());
+        }
+
+        return typesArray;
     }
 }

@@ -1,4 +1,4 @@
- package local.arch.infrastructure.controller.event;
+package local.arch.infrastructure.controller.event;
 
 import java.util.List;
 
@@ -48,6 +48,7 @@ public class EventsAdmin {
         } catch (ConstraintViolationException e) {
             throw e;
         }
+
         // добавить мероприятие
     }
 
@@ -61,9 +62,15 @@ public class EventsAdmin {
                 return Response.ok("{\n\"status\": true \n}").build();
 
             } catch (NotFoundException e) {
-                return Response.status(Response.Status.NOT_FOUND).entity("{\"status\": false, \n\"message\": \"Мероприятие не найдена\" \n}").build();
+                return Response
+                        .status(Response.Status.NOT_FOUND)
+                        .entity("{\"status\": false, \n\"message\": \"Мероприятие не найдена\" \n}")
+                        .build();
             } catch (Exception e) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\n\"status\": false, \n\"message\": \"Внутренняя ошибка сервера\" \n}").build();
+                return Response
+                        .status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("{\n\"status\": false, \n\"message\": \"Внутренняя ошибка сервера\" \n}")
+                        .build();
             }
         } else {
             return Response.ok("{\n\"status\": false \n\"message\": \"Неверный ID\" \n}").build();
@@ -132,21 +139,18 @@ public class EventsAdmin {
             for (UserEvent ue : userEvent) {
                 eventsService.saveInfoParticipance(eventID, ue);
             }
-            return Response.ok("check users by events").build();
+            return Response.ok("ok").build();
         } catch (Exception e) {
-            return Response.ok("check users by events").build();
+            return Response.ok(e).build();
         }
     }
 
-    // [
-    // {
-    // "userID": 2,
-    // "stampParticipate": true,
-    // "timeParticipate": 2
-    // }, {
-    // "userID": 3,
-    // "stampParticipate": true,
-    // "timeParticipate": 6.5
-    // }
-    // ]
+    @GET
+    @Path("/types")
+    public Response getTypesEvents() {
+
+        List<String> types = eventsService.getTypesEvents();
+
+        return Response.ok(types).build();
+    }
 }

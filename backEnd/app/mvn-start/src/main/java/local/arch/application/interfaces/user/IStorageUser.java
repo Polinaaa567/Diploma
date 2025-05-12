@@ -17,7 +17,7 @@ public interface IStorageUser {
 
     public User receiveUserData(Integer idUser);
 
-    public List<User> receiveUserRating();
+    public List<User> receiveUserRating(Integer userID);
 
     public List<User> receiveCertificate(Integer userID);
 }

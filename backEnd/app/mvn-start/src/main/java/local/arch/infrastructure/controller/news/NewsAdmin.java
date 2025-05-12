@@ -83,21 +83,5 @@ public class NewsAdmin {
         }
 
         // удалить мероприятие
-
     }
-
-    // @DELETE
-    // @Path("/{eventID}")
-    // public Response deleteNewsAdmin(@PathParam("eventID") Integer eventID) {
-
-    // // удалить новость
-
-    // try {
-    // newsService.deleteNews(eventID);
-
-    // return Response.ok("{\n\"status\": true\n}").build();
-    // } catch (Exception e) {
-    // return Response.ok("{\n\"status\": false\n}").build();
-    // }
-    // }
 }

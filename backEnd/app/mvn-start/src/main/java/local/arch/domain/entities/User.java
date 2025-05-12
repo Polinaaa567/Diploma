@@ -41,4 +41,6 @@ public class User {
     private String msg;
 
     private Boolean status;
+
+    private Integer level;
 }

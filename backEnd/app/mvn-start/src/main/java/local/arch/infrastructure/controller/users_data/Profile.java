@@ -22,6 +22,7 @@ public class Profile {
     @BuiltUser
     IUserService userService;
 
+    // +
     @GET
     @Produces("application/json")
     public Response getInfoAboutUsers(@QueryParam("userID") Integer userID) {
@@ -38,7 +39,7 @@ public class Profile {
                     .add("clothingSize", user.getClothingSize() != null ? user.getClothingSize() : "xs")
                     .add("ageStamp", user.getAgeStamp() != null ? user.getAgeStamp() : "16-17")
                     .add("formEducation", user.getFormEducation() != null ? user.getFormEducation() : "очная")
-                    .add("basisEducation", user.getBasisEducation() != null ?user.getBasisEducation() : "бюджет");
+                    .add("basisEducation", user.getBasisEducation() != null ? user.getBasisEducation() : "бюджет");
 
             return Response.ok(objBuilder.build()).build();
         } else {
@@ -50,6 +51,7 @@ public class Profile {
         }
     }
 
+    // +
     @PUT
     @Produces("application/json")
     @Consumes("application/json")

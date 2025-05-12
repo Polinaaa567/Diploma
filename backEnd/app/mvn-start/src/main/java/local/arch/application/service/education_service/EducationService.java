@@ -40,4 +40,9 @@ public class EducationService implements IEducationService, IStorageEducationUsi
     public void changeLessonInfo(Integer lessonID, Lesson lesson) {
         storageEducation.changeLessonInfo(lessonID, lesson);
     }
+
+    @Override
+    public Lesson receiveLessonInfo(Integer lessonID) {
+       return storageEducation.receiveLessonInfo(lessonID);
+    }
 }

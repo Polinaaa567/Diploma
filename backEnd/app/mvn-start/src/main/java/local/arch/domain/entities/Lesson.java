@@ -4,11 +4,15 @@ import lombok.Data;
 
 @Data
 public class Lesson {
-    private Integer videoLessonID;
+    private Integer lessonID;
    
     private String headline;
    
     private String link;
    
-    private Integer numberPointsForLesson; 
+    private Integer numberPoints; 
+
+    private Boolean status;
+
+    private String description;
 }

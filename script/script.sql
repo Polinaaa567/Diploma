@@ -309,3 +309,120 @@ SET CLIENT_ENCODING TO 'UTF8';
 --         ON DELETE CASCADE
 --         NOT VALID
 -- );
+
+-- CREATE SEQUENCE IF NOT EXISTS types_id_type_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS types
+-- (
+--     id_type integer NOT NULL DEFAULT nextval('types_id_type_seq'::regclass),
+--     name text COLLATE pg_catalog."default" NOT NULL,
+--     CONSTRAINT types_pkey PRIMARY KEY (id_type)
+-- );
+
+-- ALTER TABLE events 
+-- DROP COLUMN event_type;
+
+-- ALTER TABLE events 
+-- add COLUMN fk_type integer;
+
+-- ALTER TABLE events 
+-- ADD CONSTRAINT events_pkey PRIMARY KEY (event_id);
+
+-- ALTER TABLE events 
+-- ADD CONSTRAINT events_fk_type_fkey FOREIGN KEY (fk_type)
+--     REFERENCES public.types (id_type) MATCH SIMPLE
+--     ON UPDATE NO ACTION
+--     ON DELETE NO ACTION
+--     NOT VALID;
+
+-- ALTER TABLE users_points 
+-- add COLUMN fk_event_id integer;
+
+-- ALTER TABLE users_points 
+-- ADD CONSTRAINT users_points_pkey PRIMARY KEY (user_points_id);
+
+-- ALTER TABLE users_points 
+-- ADD CONSTRAINT users_points_fk_event_id_fkey FOREIGN KEY (fk_event_id)
+--         REFERENCES public.events (event_id) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE NO ACTION
+--         NOT VALID;
+
+-- CREATE SEQUENCE IF NOT EXISTS lessons_lesson_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS lessons
+-- (
+--     lesson_id integer NOT NULL DEFAULT nextval('lessons_lesson_id_seq'::regclass),
+--     headline text COLLATE pg_catalog."default" NOT NULL,
+--     link text COLLATE pg_catalog."default" NOT NULL,
+--     number_points integer NOT NULL DEFAULT 5,
+--     date_creation timestamp with time zone NOT NULL,
+--     CONSTRAINT lessons_pkey PRIMARY KEY (lesson_id)
+-- );
+
+-- CREATE SEQUENCE IF NOT EXISTS center_center_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+-- CREATE TABLE IF NOT EXISTS center
+-- (
+--     center_id integer NOT NULL DEFAULT nextval('center_center_id_seq'::regclass),
+--     name text NOT NULL,
+--     description text NOT NULL,
+--     image_url text,
+--     date_change timestamp with time zone NOT NULL,
+--     contacts text,
+--     address text ,
+--     CONSTRAINT center_pkey PRIMARY KEY (center_id)
+-- );
+
+-- INSERT INTO center(
+--     name, description, date_change, contacts , address
+-- ) VALUES (
+--     'Волонтёрский центр КемГУ | Добро.Центр КемГУ', 'Новая команда КемГУ!
+-- Именно здесь собрались те люди, которые готовы работать в любом направлении и помогать общественности!
+-- Стань частью новой организации!', '01-05-2025 12:40:00', 'https://vk.com/dobro_kemsu?from=groups', 'г. Кемерово, пр. Советский 73, ауд. 2101'
+-- );
+
+
+-- CREATE SEQUENCE IF NOT EXISTS faq_faq_id_seq
+--     INCREMENT 1
+--     START 1
+--     MINVALUE 1
+--     MAXVALUE 2147483647
+--     CACHE 1;
+
+
+-- CREATE TABLE IF NOT EXISTS faq
+-- (
+--     faq_id integer NOT NULL DEFAULT nextval('faq_faq_id_seq'::regclass),
+--     question text NOT NULL,
+--     answer text NOT NULL,
+--     CONSTRAINT faq_pkey PRIMARY KEY (faq_id)
+-- );
+
+-- insert into faq(question, answer) values ('ква', 'кря');
+
+-- ALTER TABLE lessons 
+-- add COLUMN description TEXT;
+
+
+ALTER TABLE users_points 
+ADD CONSTRAINT users_points_fk_lesson_id_fkey FOREIGN KEY (fk_lesson_id)
+        REFERENCES lessons (lesson_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID;

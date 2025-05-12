@@ -17,11 +17,10 @@ public interface IUserService {
 
     public User receiveUserData(Integer idUser);
 
-    public List<User> receiveUserRating();
+    public List<User> receiveUserRating(Integer userID);
 
     public List<User> receiveCertificate(Integer userID);
-    // public String receiveCertificate(int userID);
-
+    
     // отдавть права админа
 
 }

@@ -14,4 +14,6 @@ public interface IEducationService {
     public void deleteLesson(Integer lessonID);
 
     public void changeLessonInfo(Integer lessonID, Lesson lesson);
+
+    public Lesson receiveLessonInfo(Integer lessonID);
 }
