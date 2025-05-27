@@ -2,10 +2,10 @@ package local.arch.application.service.education_service;
 
 import java.util.List;
 
-import local.arch.application.interfaces.education.IEducationService;
-import local.arch.application.interfaces.education.IStorageEducation;
-import local.arch.application.interfaces.education.IStorageEducationUsing;
-import local.arch.domain.entities.Lesson;
+import local.arch.application.interfaces.page.education.IEducationService;
+import local.arch.application.interfaces.page.education.IStorageEducation;
+import local.arch.application.interfaces.page.education.IStorageEducationUsing;
+import local.arch.domain.entities.page.Lesson;
 
 public class EducationService implements IEducationService, IStorageEducationUsing {
 
@@ -22,7 +22,7 @@ public class EducationService implements IEducationService, IStorageEducationUsi
     }
 
     @Override
-    public Boolean sendPointsToUser(Integer userID, Integer lessonID) {
+    public Lesson sendPointsToUser(Integer userID, Integer lessonID) {
         return storageEducation.sendPointsToUser(userID, lessonID);
     }
 

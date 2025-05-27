@@ -25,9 +25,9 @@ public class EImageNews {
     private Integer imageID;
 
     @OneToOne
-    @JoinColumn(name = "\"fk_news_id\"", referencedColumnName = "\"photo_id\"")
+    @JoinColumn(name = "\"fk_news_id\"", referencedColumnName = "\"news_id\"")
     private ENews news;
 
     @Column(name = "\"image_data\"")
-    private Byte[] image;
+    private String image;
 }

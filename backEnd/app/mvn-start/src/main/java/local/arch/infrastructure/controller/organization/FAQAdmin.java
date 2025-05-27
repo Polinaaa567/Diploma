@@ -10,9 +10,8 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-
-import local.arch.application.interfaces.organization.IOrganizationService;
-import local.arch.domain.entities.FAQData;
+import local.arch.application.interfaces.page.organization.IOrganizationService;
+import local.arch.domain.entities.page.FAQData;
 import local.arch.infrastructure.builder.organization_annotation.BuiltOrganization;
 
 @Path("/admin/faq")

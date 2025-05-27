@@ -15,6 +15,6 @@ public class Filter implements ContainerResponseFilter {
         responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
         responseContext.getHeaders().putSingle("Access-Control-Allow-Credentials", "true");
         responseContext.getHeaders().putSingle("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-        responseContext.getHeaders().putSingle("Access-Control-Allow-Headers", "accept, authorization, content-type, x-requested-with");
+        responseContext.getHeaders().putSingle("Access-Control-Allow-Headers", "accept, authorization, content-type, x-requested-with, token");
     }
 }

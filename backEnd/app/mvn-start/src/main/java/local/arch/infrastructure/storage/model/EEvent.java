@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +23,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Cacheable(true)
 @Entity
 @Table(name = "\"events\"")
 public class EEvent {
@@ -64,7 +66,7 @@ public class EEvent {
     private String linkDobroRF;
 
     @Column(name = "\"image\"")
-    private Byte[] image;
+    private String image;
 
     @Column(name = "\"date_event\"", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
@@ -72,17 +74,4 @@ public class EEvent {
 
     @Column(name = "\"is_participation\"")
     private Boolean isParticipation;
-
-    public EEvent() {
-    }
-
-    public EEvent(Integer eventID, Calendar dateEvent, String nameEvent,
-            String descriptionEvent, Byte[] image, boolean isParticipation) {
-        this.eventID = eventID;
-        this.dateEvent = dateEvent;
-        this.nameEvent = nameEvent;
-        this.descriptionEvent = descriptionEvent;
-        this.image = image;
-        this.isParticipation = isParticipation;
-    }
 }

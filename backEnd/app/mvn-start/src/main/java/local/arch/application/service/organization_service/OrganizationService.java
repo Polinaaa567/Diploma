@@ -2,11 +2,12 @@ package local.arch.application.service.organization_service;
 
 import java.util.List;
 
-import local.arch.application.interfaces.organization.IOrganizationService;
-import local.arch.application.interfaces.organization.IStorageOrganization;
-import local.arch.application.interfaces.organization.IStorageOrganizationUsing;
-import local.arch.domain.entities.FAQData;
-import local.arch.domain.entities.InfoCenter;
+import local.arch.application.interfaces.page.organization.IOrganizationService;
+import local.arch.application.interfaces.page.organization.IStorageOrganization;
+import local.arch.application.interfaces.page.organization.IStorageOrganizationUsing;
+import local.arch.domain.entities.YearData;
+import local.arch.domain.entities.page.FAQData;
+import local.arch.domain.entities.page.InfoCenter;
 
 public class OrganizationService implements IOrganizationService, IStorageOrganizationUsing {
 
@@ -25,5 +26,10 @@ public class OrganizationService implements IOrganizationService, IStorageOrgani
     @Override
     public InfoCenter receiveInfoAboutOrganization() {
         return storageOrganization.receiveInfoAboutOrganization();
+    }
+
+    @Override
+    public List<YearData> receiveReports() {
+        return storageOrganization.receiveReports();
     }
 }

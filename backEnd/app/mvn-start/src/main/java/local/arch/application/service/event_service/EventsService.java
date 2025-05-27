@@ -1,16 +1,25 @@
 package local.arch.application.service.event_service;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
-import local.arch.application.interfaces.event.IEventsService;
-import local.arch.application.interfaces.event.IStorageEvent;
-import local.arch.application.interfaces.event.IStorageEventUsing;
-import local.arch.domain.entities.Event;
-import local.arch.domain.entities.UserEvent;
+import local.arch.application.interfaces.config.IFileConfig;
+import local.arch.application.interfaces.config.IUseFileConfig;
+import local.arch.application.interfaces.page.event.IEventsService;
+import local.arch.application.interfaces.page.event.IStorageEvent;
+import local.arch.application.interfaces.page.event.IStorageEventUsing;
+import local.arch.domain.Factory;
+import local.arch.domain.ITextToImage;
+import local.arch.domain.entities.Pagination;
+import local.arch.domain.entities.page.Event;
+import local.arch.domain.entities.page.User;
+import local.arch.domain.entities.page.UserEvent;
 
-public class EventsService implements IEventsService, IStorageEventUsing {
+public class EventsService implements IEventsService, IStorageEventUsing, IUseFileConfig {
 
     IStorageEvent storageEvent;
+    IFileConfig fileConfig;
 
     @Override
     public List<Event> receiveEvents() {
@@ -18,13 +27,13 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     }
 
     @Override
-    public List<Event> receivePastEventsUser(Integer userID) {
-        return storageEvent.receivePastEventsUser(userID);
+    public Pagination receivePastEventsUser(Integer userID, Integer page, Integer limit) {
+        return storageEvent.receivePastEventsUser(userID, page, limit);
     }
 
     @Override
-    public List<Event> receiveFutureEventsUser(Integer userID) {
-        return storageEvent.receiveFutureEventsUser(userID);
+    public Pagination receiveFutureEventsUser(Integer userID, Integer page, Integer limit) {
+        return storageEvent.receiveFutureEventsUser(userID, page, limit);
     }
 
     @Override
@@ -33,12 +42,12 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     }
 
     @Override
-    public String signUpForEvent(UserEvent userEvent) {
+    public UserEvent signUpForEvent(UserEvent userEvent) {
         return storageEvent.signUpForEvent(userEvent);
     }
 
     @Override
-    public String deleteUsersEvent(UserEvent userEvent) {
+    public UserEvent deleteUsersEvent(UserEvent userEvent) {
         return storageEvent.deleteUsersEvent(userEvent);
     }
 
@@ -64,7 +73,36 @@ public class EventsService implements IEventsService, IStorageEventUsing {
 
     @Override
     public String saveInfoParticipance(Integer eventID, UserEvent ue) {
-       return storageEvent.saveInfoParticipance(eventID, ue);
+        Event event = storageEvent.findEvent(eventID);
+        User user = storageEvent.findUser(ue.getUserID());
+        
+        try {
+            BufferedImage template = fileConfig.loadTemplateSertificate();
+
+
+            String imagePath;
+            
+            if(ue.getStampParticipate()) {
+                ITextToImage modifiedImage = Factory.createTextToImage();
+                
+                BufferedImage image = modifiedImage.addTextToImage(template, event.getName(), user);
+                imagePath = fileConfig.saveModifiedCertificate(image, ue.getUserID());
+
+                user.setCertificate(imagePath);
+
+                ue.setUser(user);
+            } else {
+                imagePath = null;
+                
+                user.setCertificate(imagePath);
+
+                ue.setUser(user);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return storageEvent.saveInfoParticipance(eventID, ue);
     }
 
     @Override
@@ -73,12 +111,22 @@ public class EventsService implements IEventsService, IStorageEventUsing {
     }
 
     @Override
-    public List<Event> eventsBetwenDate(String dateStart, String dateEnd) {
-       return storageEvent.eventsBetwenDate(dateStart, dateEnd);
+    public Pagination eventsBetwenDate(String dateStart, String dateEnd, Integer page, Integer limit) {
+        return storageEvent.eventsBetwenDate(dateStart, dateEnd, page, limit);
     }
 
     @Override
     public List<String> getTypesEvents() {
         return storageEvent.getTypesEvents();
+    }
+
+    @Override
+    public Pagination receiveAllEvents(Integer page, Integer limit) {
+        return storageEvent.receiveAllEvents(page, limit);
+    }
+
+    @Override
+    public void useFileConfig(IFileConfig fileConfig) {
+        this.fileConfig = fileConfig;
     }
 }

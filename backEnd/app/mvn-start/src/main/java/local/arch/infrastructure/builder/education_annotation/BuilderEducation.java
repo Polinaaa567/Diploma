@@ -2,10 +2,9 @@ package local.arch.infrastructure.builder.education_annotation;
 
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-
-import local.arch.application.interfaces.education.IEducationService;
-import local.arch.application.interfaces.education.IStorageEducation;
-import local.arch.application.interfaces.education.IStorageEducationUsing;
+import local.arch.application.interfaces.page.education.IEducationService;
+import local.arch.application.interfaces.page.education.IStorageEducation;
+import local.arch.application.interfaces.page.education.IStorageEducationUsing;
 
 public class BuilderEducation {
     @Inject

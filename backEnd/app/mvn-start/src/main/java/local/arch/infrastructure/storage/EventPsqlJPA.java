@@ -1,6 +1,7 @@
 package local.arch.infrastructure.storage;
 
 import java.util.Date;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -8,22 +9,30 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.github.wslf.levenshteindistance.LevenshteinCalculator;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import local.arch.application.interfaces.event.IStorageEvent;
-import local.arch.domain.entities.Event;
-import local.arch.domain.entities.User;
+
+import local.arch.application.interfaces.config.IFileConfig;
+import local.arch.application.interfaces.page.event.IStorageEvent;
 import local.arch.infrastructure.storage.model.EUser;
+import local.arch.infrastructure.storage.model.ECertificate;
 import local.arch.infrastructure.storage.model.EEvent;
 import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.EType;
-import local.arch.domain.entities.UserEvent;
+import local.arch.domain.entities.Pagination;
+import local.arch.domain.entities.page.Event;
+import local.arch.domain.entities.page.User;
+import local.arch.domain.entities.page.UserEvent;
 import local.arch.infrastructure.storage.model.EUserEvent;
 
 @Named
@@ -33,6 +42,9 @@ public class EventPsqlJPA implements IStorageEvent {
     Calendar calendar = Calendar.getInstance();
 
     LevenshteinCalculator calculator = new LevenshteinCalculator();
+
+    @Inject
+    IFileConfig fileConfig;
 
     @PersistenceContext(unitName = "Volunteering")
     private EntityManager entityManager;
@@ -53,7 +65,7 @@ public class EventPsqlJPA implements IStorageEvent {
             event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            // event.setImage((Byte[]) result[4]);
+            event.setImageUrl((String) result[4]);
             event.setIsRelevance(((Calendar) result[1]).compareTo(calendar) > 0
                     ? true
                     : false);
@@ -66,17 +78,17 @@ public class EventPsqlJPA implements IStorageEvent {
     }
 
     @Override
-    public List<Event> receivePastEventsUser(Integer userID) {
+    public Pagination receiveAllEvents(Integer page, Integer limit) {
+        Integer sizeAllEvents = entityManager.createQuery("Select p from EEvent p", EEvent.class)
+                .getResultList()
+                .size();
 
         List<Object[]> results = entityManager.createQuery(
-                "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image, eu.stampParticipate, eu.timeParticipate "
-                        + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
-                        + "WHERE u.idUser = :id "
-                        + "and e.dateEvent < :timestamp "
-                        + "order by e.dateEvent DESC",
+                "SELECT p.eventID, p.dateEvent, p.nameEvent, p.descriptionEvent, p.image, p.isParticipation "
+                        + " FROM EEvent p "
+                        + " order by p.dateEvent DESC ",
                 Object[].class)
-                .setParameter("id", userID)
-                .setParameter("timestamp", timestamp)
+                .setMaxResults(limit * page)
                 .getResultList();
 
         List<Event> events = new ArrayList<>();
@@ -86,40 +98,120 @@ public class EventPsqlJPA implements IStorageEvent {
             event.setDateC((Calendar) result[1]);
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            // event.setImage((Byte[]) result[4]);
+            event.setImageUrl((String) result[4]);
+            event.setIsRelevance(((Calendar) result[1]).compareTo(calendar) > 0
+                    ? true
+                    : false);
+            event.setIsParticipation((Boolean) result[5]);
+
+            events.add(event);
+        }
+
+        Pagination pagination = new Pagination();
+        pagination.setTotalCount(sizeAllEvents);
+        pagination.setEvents(events);
+
+        return pagination;
+    }
+
+    @Override
+    public Pagination receivePastEventsUser(Integer userID, Integer page, Integer limit) {
+        List<Object[]> results;
+        String query = "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image, eu.stampParticipate, eu.timeParticipate "
+                + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
+                + "WHERE u.idUser = :id "
+                + "and e.dateEvent < :timestamp "
+                + "order by e.dateEvent DESC";
+
+        Integer total = entityManager.createQuery(
+                query, Object[].class)
+                .setParameter("id", userID)
+                .setParameter("timestamp", timestamp)
+                .getResultList().size();
+
+        if (page != null && page != 0) {
+            results = entityManager.createQuery(
+                    query, Object[].class)
+                    .setParameter("id", userID)
+                    .setParameter("timestamp", timestamp)
+                    .setMaxResults(page * limit)
+                    .getResultList();
+        } else {
+            results = entityManager.createQuery(
+                    query, Object[].class)
+                    .setParameter("id", userID)
+                    .setParameter("timestamp", timestamp)
+                    .getResultList();
+        }
+
+        List<Event> events = new ArrayList<>();
+        for (Object[] result : results) {
+            Event event = new Event();
+
+            event.setEventID((Integer) result[0]);
+            event.setDateC((Calendar) result[1]);
+            event.setName((String) result[2]);
+            event.setDescription((String) result[3]);
+            event.setImageUrl((String) result[4]);
             event.setStampParticipate((Boolean) result[5]);
             event.setTimeParticipate((Double) result[6]);
 
             events.add(event);
         }
-        return events;
+
+        Pagination pagination = new Pagination();
+        pagination.setTotalCount(total);
+        pagination.setEvents(events);
+
+        return pagination;
     }
 
     @Override
-    public List<Event> receiveFutureEventsUser(Integer userID) {
-        List<Object[]> results = entityManager.createQuery(
-                "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image "
-                        + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
-                        + "WHERE u.idUser = :id "
-                        + "and e.dateEvent > :timestamp " 
-                        + "order by e.dateEvent",
-                Object[].class)
+    public Pagination receiveFutureEventsUser(Integer userID, Integer page, Integer limit) {
+        List<Object[]> results;
+        String query = "SELECT e.eventID, e.dateEvent, e.nameEvent, e.descriptionEvent, e.image "
+                + "FROM EUserEvent eu JOIN eu.fkUserID u JOIN eu.fkEventID e "
+                + "WHERE u.idUser = :id "
+                + "and e.dateEvent > :timestamp "
+                + "order by e.dateEvent";
+        Integer total = entityManager.createQuery(
+                query, Object[].class)
                 .setParameter("id", userID)
                 .setParameter("timestamp", timestamp)
-                .getResultList();
+                .getResultList().size();
 
+        if (page != null && page != 0) {
+            results = entityManager.createQuery(
+                    query, Object[].class)
+                    .setParameter("id", userID)
+                    .setParameter("timestamp", timestamp)
+                    .setMaxResults(page * limit)
+                    .getResultList();
+        } else {
+            results = entityManager.createQuery(
+                    query, Object[].class)
+                    .setParameter("id", userID)
+                    .setParameter("timestamp", timestamp)
+                    .getResultList();
+        }
         List<Event> events = new ArrayList<>();
+
         for (Object[] result : results) {
             Event event = new Event();
             event.setEventID((Integer) result[0]);
             event.setDateC(((Calendar) result[1]));
             event.setName((String) result[2]);
             event.setDescription((String) result[3]);
-            // event.setImage((Byte[]) result[4]);
+            event.setImageUrl((String) result[4]);
 
             events.add(event);
         }
-        return events;
+
+        Pagination pagination = new Pagination();
+        pagination.setTotalCount(total);
+        pagination.setEvents(events);
+
+        return pagination;
     }
 
     @Override
@@ -143,7 +235,7 @@ public class EventPsqlJPA implements IStorageEvent {
         event.setDateC((Calendar) events.getDateEvent());
         event.setName(events.getNameEvent());
         event.setDescription(events.getDescriptionEvent());
-        // event.setImage(events.getImage());
+        event.setImageUrl(events.getImage());
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(Date.from(timestamp.toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()));
@@ -151,23 +243,27 @@ public class EventPsqlJPA implements IStorageEvent {
         if (userEvent.getUserID() != null && events.getDateEvent().compareTo(calendar) > 0) {
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
-            Boolean existEventUser = entityManager.createQuery(
-                    "SELECT p "
-                            + "FROM EUserEvent p "
-                            + "where p.fkEventID = :idE and p.fkUserID = :idU ",
-                    EUserEvent.class)
-                    .setParameter("idE", events).setParameter("idU", user).getResultList().isEmpty()
-                            ? false
-                            : true;
+            if (user.getAgeStamp().equals("16-17") && events.getAgeRestrictions() == 18) {
+                event.setStatusParticipate(true);
+            } else {
+                Boolean existEventUser = entityManager.createQuery(
+                        "SELECT p "
+                                + "FROM EUserEvent p "
+                                + "where p.fkEventID = :idE and p.fkUserID = :idU ",
+                        EUserEvent.class)
+                        .setParameter("idE", events).setParameter("idU", user).getResultList().isEmpty()
+                                ? false
+                                : true;
 
-            if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
-                if (events.getMaxNumberParticipants() - count <= 0) {
-                    event.setStatusParticipate(true);
+                if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
+                    if (events.getMaxNumberParticipants() - count <= 0) {
+                        event.setStatusParticipate(true);
+                    } else {
+                        event.setStatusParticipate(existEventUser);
+                    }
                 } else {
                     event.setStatusParticipate(existEventUser);
                 }
-            } else {
-                event.setStatusParticipate(existEventUser);
             }
         } else {
             event.setStatusParticipate(true);
@@ -187,13 +283,21 @@ public class EventPsqlJPA implements IStorageEvent {
 
     @Override
     @Transactional
-    public String signUpForEvent(UserEvent userEvent) {
+    public UserEvent signUpForEvent(UserEvent userEvent) {
+        UserEvent ue = new UserEvent();
+
         try {
+
             EEvent events = entityManager.find(EEvent.class, userEvent.getEventID());
 
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
 
-            if (user.getClothingSize() != null
+            if (events.getDateEvent().before(calendar)) {
+                ue.setStatus(false);
+                ue.setMsg("Мероприятие прошло, записаться нельзя");
+
+                return ue;
+            } else if (user.getClothingSize() != null
                     && user.getFirstName() != null
                     && user.getLastName() != null
                     && user.getAgeStamp() != null) {
@@ -226,55 +330,57 @@ public class EventPsqlJPA implements IStorageEvent {
                 if (existingEUserEvent.isEmpty()) {
                     if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
                         if (events.getMaxNumberParticipants() - count <= 0) {
-                            return "{\n\"status\": true, \n\"message\": \"Кол-во мест на мероприятие закончилось\","
-                                    + " \n\"countParticipants\": " + count
-                                    + "\n}";
+                            ue.setCountParticipants(count);
+                            ue.setStatus(false);
+                            ue.setMsg("Кол-во мест на мероприятие закончилось");
+                            return ue;
                         } else {
 
                             entityManager.persist(eu);
 
-                            Integer number = entityManager.createQuery(
-                                    "SELECT p "
-                                            + "FROM EUserEvent p "
-                                            + "where p.fkEventID = :id",
-                                    EUserEvent.class)
-                                    .setParameter("id", events)
-                                    .getResultList().size();
-                            return "{\n\"status\": true, \n\"message\": \"Успешная регистрация на мероприятие\","
-                                    + " \n\"countParticipants\": " + number
-                                    + "\n}";
-                        }
+                            ue.setCountParticipants(count + 1);
+                            ue.setStatus(true);
+                            ue.setMsg("Успешная регистрация на мероприятие");
 
+                            return ue;
+                        }
                     } else {
 
                         entityManager.persist(eu);
 
-                        Integer number = entityManager.createQuery(
-                                "SELECT p "
-                                        + "FROM EUserEvent p "
-                                        + "where p.fkEventID = :id",
-                                EUserEvent.class)
-                                .setParameter("id", events)
-                                .getResultList().size();
-                        return "{\n\"status\": true, \n\"message\": \"Успешная решистрация на мероприятие\","
-                                + " \n\"countParticipants\": " + number
-                                + "\n}";
+                        ue.setCountParticipants(count + 1);
+                        ue.setStatus(true);
+                        ue.setMsg("Успешная регистрация на мероприятие");
+
+                        return ue;
                     }
                 } else {
-                    return "{\n \"status\": true, \n\"message\": \"Вы уже записаны на мероприятие\"\n}";
+                    ue.setCountParticipants(count);
+                    ue.setStatus(true);
+                    ue.setMsg("Вы уже записаны на мероприятие");
+
+                    return ue;
                 }
 
             } else {
-                return "{\n\"status\": false, \n\"message\": \"Не все данные о пользователе заполнены\"" + "\n}";
+                ue.setStatus(false);
+                ue.setMsg("Не все данные о пользователе заполнены");
+
+                return ue;
             }
         } catch (Exception e) {
-            return "{\n \"status\": false, \n\"message\": \"" + e + "\"\n}";
+            ue.setStatus(false);
+            ue.setMsg("Ошибка: " + e);
+
+            return ue;
         }
     }
 
     @Override
     @Transactional
-    public String deleteUsersEvent(UserEvent userEvent) {
+    public UserEvent deleteUsersEvent(UserEvent userEvent) {
+        UserEvent ue = new UserEvent();
+
         try {
             EEvent events = entityManager.find(EEvent.class, userEvent.getEventID());
 
@@ -287,19 +393,27 @@ public class EventPsqlJPA implements IStorageEvent {
                     .setParameter("event", events)
                     .setParameter("user", user)
                     .getResultList();
-            if (query.isEmpty()) {
-                return "{\n\"status\": false, \n\"message\": \"Произошла ошибка при удалении\"" + "\n}";
 
+            if (query.isEmpty()) {
+                ue.setStatus(false);
+                ue.setMsg("Произошла ошибка при удалении");
+
+                return ue;
             } else {
                 for (EUserEvent userEventToRemove : query) {
                     entityManager.remove(entityManager.contains(userEventToRemove) ? userEventToRemove
                             : entityManager.merge(userEventToRemove));
                 }
+                ue.setStatus(true);
+                ue.setMsg("Успешно удалено мероприятие из списка");
 
-                return "{\n\"status\": false,\n\"message\":\"Успешно удалено мероприятие из списка\"\n}";
+                return ue;
             }
         } catch (Exception e) {
-            return "{\n\"status\": true, \n\"message\": \"Ошибка: " + e + "\"\n}";
+            ue.setStatus(false);
+            ue.setMsg("Ошибка: " + e);
+
+            return ue;
         }
     }
 
@@ -341,8 +455,7 @@ public class EventPsqlJPA implements IStorageEvent {
         ev.setDescriptionEvent(data.getDescription());
         ev.setEventFormat(data.getFormat());
         ev.setEventType(type);
-        // ev.setImage(data.getImage());
-        // ev.setImage(Byte[]);
+        ev.setImage(data.getImageUrl());
         ev.setLinkDobroRF(data.getLinkDobroRF());
         ev.setMaxNumberParticipants(data.getMaxCountParticipants());
         ev.setNameEvent(data.getName());
@@ -355,10 +468,19 @@ public class EventPsqlJPA implements IStorageEvent {
     @Override
     @Transactional
     public void deleteEvent(Integer eventID) {
-        EEvent events = entityManager.find(EEvent.class, eventID);
+        EEvent event = entityManager.find(EEvent.class, eventID);
 
-        if (events != null) {
-            entityManager.remove(events);
+        if (event != null) {
+            entityManager.remove(event);
+
+            if (event.getImage() != null) {
+                try {
+                    fileConfig.deleteImage(event.getImage());
+                } catch (IOException e) {
+                    Logger.getLogger(getClass().getName())
+                            .log(Level.WARNING, "Ошибка удаления файла: " + event.getImage(), e);
+                }
+            }
         } else {
             throw new EntityNotFoundException("Event with ID " + eventID + " not found.");
         }
@@ -446,51 +568,75 @@ public class EventPsqlJPA implements IStorageEvent {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = { RuntimeException.class })
     public String saveInfoParticipance(Integer eventID, UserEvent ue) {
 
-        EEvent event = entityManager.find(EEvent.class, eventID);
-
-        EUser user = entityManager.find(EUser.class, ue.getUserID());
-
-        EUserEvent userEvent = entityManager
-                .createQuery("Select p from EUserEvent p where p.fkUserID = :idU and p.fkEventID = :idE",
-                        EUserEvent.class)
-                .setParameter("idU", user).setParameter("idE", event).getSingleResult();
-
         try {
+            EEvent event = entityManager.find(EEvent.class, eventID);
+            if (event == null) {
+                throw new EntityNotFoundException("Event not found");
+            }
+
+            EUser user = entityManager.find(EUser.class, ue.getUserID());
+            if (user == null) {
+                throw new EntityNotFoundException("User not found");
+            }
+
+            EUserEvent userEvent;
+            try {
+                userEvent = entityManager
+                        .createQuery("SELECT p FROM EUserEvent p WHERE p.fkUserID = :idU AND p.fkEventID = :idE",
+                                EUserEvent.class)
+                        .setParameter("idU", user)
+                        .setParameter("idE", event)
+                        .getSingleResult();
+            } catch (NoResultException e) {
+                userEvent = new EUserEvent();
+                userEvent.setFkUserID(user);
+                userEvent.setFkEventID(event);
+                entityManager.persist(userEvent);
+            }
+
             userEvent.setStampParticipate(ue.getStampParticipate());
             userEvent.setTimeParticipate(ue.getTimeParticipate());
             entityManager.merge(userEvent);
 
             event.setIsParticipation(true);
             entityManager.merge(event);
+
             List<EPoints> isPoints = entityManager
-                    .createQuery("Select p from EPoints p where p.fkEventID = :idE and p.fkUserID = :idU",
+                    .createQuery("SELECT p FROM EPoints p WHERE p.fkEventID = :idE AND p.fkUserID = :idU",
                             EPoints.class)
                     .setParameter("idE", event)
                     .setParameter("idU", user)
                     .getResultList();
 
-            EPoints points = new EPoints();
-
             if (ue.getStampParticipate() && isPoints.isEmpty()) {
+                EPoints points = new EPoints();
                 points.setPoints(event.getNumberPointsEvent());
                 points.setFkEventID(event);
-                points.setDateChange(timestamp);
+                points.setDateChange(new Timestamp(System.currentTimeMillis()));
                 points.setFkUserID(user);
-
                 entityManager.persist(points);
+            }
+
+            if (ue.getUser().getCertificate() != null) {
+                ECertificate certificate = new ECertificate();
+                certificate.setFkUserID(user);
+                certificate.setImageURL(ue.getUser().getCertificate());
+                entityManager.persist(certificate);
             }
 
             return "all completed";
         } catch (Exception e) {
-            return "" + e;
+            Logger.getLogger(getClass().getName())
+                    .log(Level.WARNING, "Error saving participation info", e);
+            throw new RuntimeException("Transaction failed", e);
         }
     }
 
     @Override
-    public List<Event> eventsBetwenDate(String dateStart, String dateEnd) {
+    public Pagination eventsBetwenDate(String dateStart, String dateEnd, Integer page, Integer limit) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
@@ -502,15 +648,32 @@ public class EventPsqlJPA implements IStorageEvent {
         Calendar calendarEnd = Calendar.getInstance();
         calendarEnd.setTime(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
 
-        List<EEvent> events = entityManager.createQuery(
-                "SELECT p "
-                        + "FROM EEvent p "
-                        + "WHERE p.dateEvent < :end "
-                        + "and p.dateEvent > :start",
-                EEvent.class)
+        List<EEvent> events;
+        String query = "SELECT p "
+                + "FROM EEvent p "
+                + "WHERE p.dateEvent < :end "
+                + "and p.dateEvent > :start";
+
+        Integer total = entityManager.createQuery(
+                query, EEvent.class)
                 .setParameter("start", calendarStart)
                 .setParameter("end", calendarEnd)
-                .getResultList();
+                .getResultList().size();
+
+        if (page != null && page != 0) {
+            events = entityManager.createQuery(
+                    query, EEvent.class)
+                    .setParameter("start", calendarStart)
+                    .setParameter("end", calendarEnd)
+                    .setMaxResults(page * limit)
+                    .getResultList();
+        } else {
+            events = entityManager.createQuery(
+                    query, EEvent.class)
+                    .setParameter("start", calendarStart)
+                    .setParameter("end", calendarEnd)
+                    .getResultList();
+        }
 
         List<Event> eventArray = new ArrayList<>();
         for (EEvent event : events) {
@@ -519,7 +682,7 @@ public class EventPsqlJPA implements IStorageEvent {
             e.setDateC(event.getDateEvent());
             e.setName(event.getNameEvent());
             e.setDescription(event.getDescriptionEvent());
-            // e.setImage(event.getImage());
+            e.setImageUrl(event.getImage());
             e.setIsRelevance((event.getDateEvent()).compareTo(calendar) > 0
                     ? true
                     : false);
@@ -527,7 +690,11 @@ public class EventPsqlJPA implements IStorageEvent {
 
             eventArray.add(e);
         }
-        return eventArray;
+        Pagination pagination = new Pagination();
+        pagination.setTotalCount(total);
+        pagination.setEvents(eventArray);
+
+        return pagination;
     }
 
     @Override
@@ -541,5 +708,26 @@ public class EventPsqlJPA implements IStorageEvent {
         }
 
         return typesArray;
+    }
+
+    @Override
+    public Event findEvent(Integer eventID) {
+        EEvent resEEvent = entityManager.find(EEvent.class, eventID);
+        Event event = new Event();
+        event.setName(resEEvent.getNameEvent());
+
+        return event;
+    }
+
+    @Override
+    public User findUser(Integer userID) {
+        EUser euser = entityManager.find(EUser.class, userID);
+
+        User user = new User();
+        user.setLastName(euser.getLastName());
+        user.setName(euser.getFirstName());
+        user.setPatronymic(euser.getPatronymic());
+
+        return user;
     }
 }

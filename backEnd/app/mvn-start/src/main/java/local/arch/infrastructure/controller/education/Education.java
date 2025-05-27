@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.persistence.Cacheable;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -14,14 +15,20 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
-import local.arch.application.interfaces.education.IEducationService;
-import local.arch.domain.entities.Lesson;
+import local.arch.application.interfaces.page.education.IEducationService;
+import local.arch.domain.entities.page.Lesson;
 import local.arch.infrastructure.builder.education_annotation.BuiltEducation;
 
 @Path("/education")
+@Cacheable()
 public class Education {
 
-    StringBuilder educationJson = new StringBuilder();
+    private JsonObjectBuilder buildErrorMessage(String msg, Boolean status) {
+        return Json.createObjectBuilder()
+                .add("message", msg)
+                .add("status", status);
+
+    }
 
     JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
@@ -32,36 +39,35 @@ public class Education {
     // +
     @GET
     @Produces("application/json")
-    public Response getAllLessonSheet(@QueryParam("userID") Integer userID, @QueryParam("lessonID") Integer lessonID) {
+    public Response getAllLessonSheet(
+            @QueryParam("userID") Integer userID,
+            @QueryParam("lessonID") Integer lessonID) {
 
         // Получить список всех уроков
 
         if (lessonID == null) {
             List<Lesson> lessons = educationService.receiveLessons(userID);
+
             if (userID != null) {
-                for (Lesson l : lessons) {
-                    JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                lessons.forEach(l -> {
+                    arrayBuilder.add(Json.createObjectBuilder()
                             .add("id", l.getLessonID())
                             .add("headline", l.getHeadline())
                             .add("link", l.getLink())
                             .add("description", l.getDescription() != null ? l.getDescription() : "null")
                             .add("numberPoints", l.getNumberPoints())
-                            .add("status", l.getStatus());
-
-                    arrayBuilder.add(objBuilder);
-                }
+                            .add("status", l.getStatus()));
+                });
 
                 return Response.ok(arrayBuilder.build()).build();
             } else {
-                for (Lesson l : lessons) {
-                    JsonObjectBuilder objBuilder = Json.createObjectBuilder()
+                lessons.forEach(l -> {
+                    arrayBuilder.add(Json.createObjectBuilder()
                             .add("id", l.getLessonID())
                             .add("headline", l.getHeadline())
                             .add("link", l.getLink())
-                            .add("description", l.getDescription() != null ? l.getDescription() : "null");
-
-                    arrayBuilder.add(objBuilder);
-                }
+                            .add("description", l.getDescription() != null ? l.getDescription() : "null"));
+                });
 
                 return Response.ok(arrayBuilder.build()).build();
             }
@@ -82,12 +88,14 @@ public class Education {
     @POST
     @Produces("application/json")
     @Path("/{userID}/{lessonID}")
-    public Response sendPointsToUser(@PathParam("userID") Integer userID, @PathParam("lessonID") Integer lessonID) {
+    public Response sendPointsToUser(
+            @PathParam("userID") Integer userID,
+            @PathParam("lessonID") Integer lessonID) {
 
         // отправка баллов пользователю за прохождения урока
 
-        Boolean result = educationService.sendPointsToUser(userID, lessonID);
+        Lesson result = educationService.sendPointsToUser(userID, lessonID);
 
-        return Response.ok(result).build();
+        return Response.ok(buildErrorMessage(result.getMessage(), result.getStatus()).build()).build();
     }
 }

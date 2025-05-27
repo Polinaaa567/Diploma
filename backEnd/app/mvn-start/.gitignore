@@ -1,0 +1,12 @@
+/src/main/webapp/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.idea/
+.settings/
+.classpath
+.project
+.DS_Store

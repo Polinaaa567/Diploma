@@ -420,9 +420,44 @@ SET CLIENT_ENCODING TO 'UTF8';
 -- add COLUMN description TEXT;
 
 
-ALTER TABLE users_points 
-ADD CONSTRAINT users_points_fk_lesson_id_fkey FOREIGN KEY (fk_lesson_id)
-        REFERENCES lessons (lesson_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID;
+-- ALTER TABLE users_points 
+-- ADD CONSTRAINT users_points_fk_lesson_id_fkey FOREIGN KEY (fk_lesson_id)
+--         REFERENCES lessons (lesson_id) MATCH SIMPLE
+--         ON UPDATE NO ACTION
+--         ON DELETE NO ACTION
+--         NOT VALID;
+
+DROP TABLE users_points;
+
+CREATE SEQUENCE IF NOT EXISTS users_points_user_points_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+CREATE TABLE IF NOT EXISTS users_points
+(
+    user_points_id integer NOT NULL DEFAULT nextval('users_points_user_points_id_seq'::regclass),
+    fk_user_id integer NOT NULL,
+    points integer NOT NULL DEFAULT 0,
+    date_change timestamp with time zone NOT NULL,
+    fk_event_id integer,
+    fk_lesson_id integer,
+    CONSTRAINT users_points_pkey PRIMARY KEY (user_points_id),
+    CONSTRAINT users_points_fk_event_id_fkey FOREIGN KEY (fk_event_id)
+        REFERENCES public.events (event_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    CONSTRAINT users_points_fk_lesson_id_fkey FOREIGN KEY (fk_lesson_id)
+        REFERENCES public.lessons (lesson_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID,
+    CONSTRAINT users_points_fk_user_id_fkey FOREIGN KEY (fk_user_id)
+        REFERENCES public.users (id_user) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+);

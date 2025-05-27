@@ -11,9 +11,8 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
-
-import local.arch.application.interfaces.organization.IOrganizationService;
-import local.arch.domain.entities.InfoCenter;
+import local.arch.application.interfaces.page.organization.IOrganizationService;
+import local.arch.domain.entities.page.InfoCenter;
 import local.arch.infrastructure.builder.organization_annotation.BuiltOrganization;
 
 @Path("/admin/organization")

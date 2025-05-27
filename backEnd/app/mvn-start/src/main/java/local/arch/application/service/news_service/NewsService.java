@@ -2,10 +2,10 @@ package local.arch.application.service.news_service;
 
 import java.util.List;
 
-import local.arch.application.interfaces.news.INewsService;
-import local.arch.application.interfaces.news.IStorageNews;
-import local.arch.application.interfaces.news.IStorageNewsUsing;
-import local.arch.domain.entities.News;
+import local.arch.application.interfaces.page.news.INewsService;
+import local.arch.application.interfaces.page.news.IStorageNews;
+import local.arch.application.interfaces.page.news.IStorageNewsUsing;
+import local.arch.domain.entities.page.News;
 
 public class NewsService implements INewsService, IStorageNewsUsing {
 

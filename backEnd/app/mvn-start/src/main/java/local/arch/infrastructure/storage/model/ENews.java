@@ -1,6 +1,6 @@
 package local.arch.infrastructure.storage.model;
 
-import java.sql.Timestamp;
+import java.util.Calendar;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,7 @@ public class ENews {
     @Column(name = "\"description_news\"")
     private String descriptionNews;
 
-    @Column(name = "\"date_creation\"")
-    private Timestamp dateCreation;
+    @Column(name = "\"date_creation\"", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar dateCreation;
 }

@@ -6,6 +6,7 @@
 
     <persistence-unit name="Volunteering" transaction-type="JTA">
         <jta-data-source>jdbc/local_PG_Volunteering</jta-data-source>
+        <!-- <shared-cache-mode>DISABLE_SELECTIVE</shared-cache-mode> -->
         <properties>
             <property name="javax.persistence.sharedCache.mode" value="NONE" />
             <property name="javax.persistence.cache.retrieveMode" value="BYPASS"/>

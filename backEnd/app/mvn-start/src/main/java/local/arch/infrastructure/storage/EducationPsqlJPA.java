@@ -7,12 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
-import local.arch.application.interfaces.education.IStorageEducation;
-import local.arch.domain.entities.Lesson;
+import local.arch.application.interfaces.page.education.IStorageEducation;
+import local.arch.domain.entities.page.Lesson;
 import local.arch.infrastructure.storage.model.ELessons;
 import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.EUser;
@@ -41,6 +40,7 @@ public class EducationPsqlJPA implements IStorageEducation {
             List<Lesson> lessonsList = new ArrayList<>();
             for (Object[] result : results) {
                 Lesson lesson = new Lesson();
+
                 lesson.setLessonID((Integer) result[0]);
                 lesson.setHeadline((String) result[1]);
                 lesson.setLink((String) result[2]);
@@ -63,6 +63,7 @@ public class EducationPsqlJPA implements IStorageEducation {
             List<Lesson> lessonsList = new ArrayList<>();
             for (Object[] result : results) {
                 Lesson lesson = new Lesson();
+
                 lesson.setLessonID((Integer) result[0]);
                 lesson.setHeadline((String) result[1]);
                 lesson.setLink((String) result[2]);
@@ -77,21 +78,49 @@ public class EducationPsqlJPA implements IStorageEducation {
 
     @Override
     @Transactional
-    public Boolean sendPointsToUser(Integer userID, Integer lessonID) {
-        
-        ELessons lesson = entityManager.find(ELessons.class, lessonID);
-        EUser user = entityManager.find(EUser.class, userID);
+    public Lesson sendPointsToUser(Integer userID, Integer lessonID) {
+        Lesson l = new Lesson();
 
-        EPoints points = new EPoints();
-        points.setDateChange(timestamp);
-        points.setFkEventID(null);
-        points.setFkLessonID(lesson);
-        points.setPoints(lesson.getNumberPoints());
-        points.setFkUserID(user);
+        try {
+            ELessons lesson = entityManager.find(ELessons.class, lessonID);
+            
+            if (lesson == null) {
+                l.setMessage("Урок не найден");
+                l.setStatus(false);
 
-        entityManager.persist(points);
+                return l;
+            }
 
-        return true;
+            EUser user = entityManager.find(EUser.class, userID);
+            
+            if (user == null) {
+                l.setMessage("Пользователь не найден");
+                l.setStatus(false);
+
+                return l;
+            }
+
+            EPoints points = new EPoints();
+            
+            points.setDateChange(new Timestamp(System.currentTimeMillis())); // Добавлено явное время
+            points.setFkEventID(null);
+            points.setFkLessonID(lesson);
+            points.setPoints(lesson.getNumberPoints());
+            points.setFkUserID(user);
+
+            entityManager.persist(points);
+
+            l.setMessage("Данные сохранены");
+            l.setStatus(true);
+
+            return l;
+
+        } catch (Exception e) {
+            l.setMessage("Ошибка при начислении баллов: " + e);
+            l.setStatus(false);
+
+            return l;
+        }
     }
 
     @Override
@@ -111,13 +140,11 @@ public class EducationPsqlJPA implements IStorageEducation {
     @Override
     @Transactional
     public void deleteLesson(Integer lessonID) {
+
         ELessons lessons = entityManager.find(ELessons.class, lessonID);
 
-        if (lessons != null) {
-            entityManager.remove(lessons);
-        } else {
-            throw new EntityNotFoundException("Lesson with ID " + lessonID + " not found.");
-        }
+        entityManager.remove(lessons);
+
     }
 
     @Override
@@ -140,10 +167,10 @@ public class EducationPsqlJPA implements IStorageEducation {
 
         Lesson lesson = new Lesson();
         lesson.setHeadline(l.getHeadline());
+        lesson.setDescription(l.getDescription());
         lesson.setLink(l.getLink());
         lesson.setNumberPoints(l.getNumberPoints());
 
         return lesson;
     }
-
 }
