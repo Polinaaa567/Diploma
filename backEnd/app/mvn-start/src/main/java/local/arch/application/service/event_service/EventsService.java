@@ -13,6 +13,7 @@ import local.arch.domain.Factory;
 import local.arch.domain.ITextToImage;
 import local.arch.domain.entities.Pagination;
 import local.arch.domain.entities.page.Event;
+import local.arch.domain.entities.page.Rating;
 import local.arch.domain.entities.page.User;
 import local.arch.domain.entities.page.UserEvent;
 
@@ -75,14 +76,13 @@ public class EventsService implements IEventsService, IStorageEventUsing, IUseFi
     public String saveInfoParticipance(Integer eventID, UserEvent ue) {
         Event event = storageEvent.findEvent(eventID);
         User user = storageEvent.findUser(ue.getUserID());
-        
+        List<Rating> res = storageEvent.ratingsGet(eventID, ue.getUserID());
         try {
             BufferedImage template = fileConfig.loadTemplateSertificate();
 
-
             String imagePath;
             
-            if(ue.getStampParticipate()) {
+            if(ue.getStampParticipate() && res.isEmpty()) {
                 ITextToImage modifiedImage = Factory.createTextToImage();
                 
                 BufferedImage image = modifiedImage.addTextToImage(template, event.getName(), user);

@@ -111,35 +111,6 @@ public class EducationAdmin {
 
     // ? или это
     @DELETE
-    public Response removeLesson(
-            @QueryParam("lessonID") Integer lessonID,
-            @HeaderParam("token") String token) {
-
-        // удалить урок
-
-        if (!tokenKey.isTokenValid(token)) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(buildErrorMessage("Недействительный токен", false).build())
-                    .build();
-        }
-
-        if (!tokenKey.isAdmin(token)) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .entity(buildErrorMessage("Недостаточно прав", false).build())
-                    .build();
-        }
-
-        if (lessonID != null) {
-            educationService.deleteLesson(lessonID);
-            
-            return Response.ok(buildErrorMessage("Урок удалён", true).build()).build();
-        } else {
-            return Response.ok(buildErrorMessage("Неверный ID", false).build()).build();
-        }
-    }
-
-    // ? или это
-    @DELETE
     @Path("/{lessonID}")
     public Response removeLesson1(
             @PathParam("lessonID") Integer lessonID,

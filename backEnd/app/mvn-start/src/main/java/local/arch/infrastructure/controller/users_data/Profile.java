@@ -25,7 +25,6 @@ public class Profile {
         return Json.createObjectBuilder()
                 .add("message", msg)
                 .add("status", status);
-
     }
 
     @Inject

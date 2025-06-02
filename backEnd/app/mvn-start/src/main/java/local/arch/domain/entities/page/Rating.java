@@ -17,4 +17,6 @@ public class Rating {
     private Double percent;
 
     private List<String> certificates;
+    
+    private String certificate;
 }

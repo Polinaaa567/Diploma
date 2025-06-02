@@ -3,6 +3,7 @@ package local.arch.infrastructure.controller.organization;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.json.Json;
@@ -76,7 +77,7 @@ public class ReportAdmin {
                                                         .add("description", e.getDescription())
                                                         .add("date", formatDate(e.getDateC()))
                                                         .add("usersNumber", e.getNumberParticipants())
-                                                        .add("image", "[]");
+                                                        .add("image", Optional.ofNullable(e.getImageUrl()).orElse(""));
 
                                         eventArrayBuilder.add(objBuilder);
                                 }

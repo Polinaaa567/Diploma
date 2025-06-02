@@ -28,4 +28,8 @@ public class ECertificate {
 
     @Column(name = "\"image_url\"")
     private String imageURL;
+
+    @OneToOne
+    @JoinColumn(name = "\"fk_event_id\"", referencedColumnName = "\"event_id\"")
+    private EEvent fkEventID;
 }

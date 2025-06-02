@@ -31,6 +31,7 @@ import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.EType;
 import local.arch.domain.entities.Pagination;
 import local.arch.domain.entities.page.Event;
+import local.arch.domain.entities.page.Rating;
 import local.arch.domain.entities.page.User;
 import local.arch.domain.entities.page.UserEvent;
 import local.arch.infrastructure.storage.model.EUserEvent;
@@ -509,6 +510,20 @@ public class EventPsqlJPA implements IStorageEvent {
             }
         }
 
+        if (data.getImage() != null && !data.getImage().isBlank() && !data.getImage().contains("event")) {
+            try {
+                String imageUrl = fileConfig.saveImageFromBase64(data.getImage(), "events");
+                fileConfig.deleteImage(ev.getImage());
+
+                ev.setImage(imageUrl);
+
+            } catch (IOException e) {
+                Logger.getLogger(getClass().getName())
+                        .log(Level.WARNING, "Ошибка удаления файла: " + data.getImage(), e);
+            }
+
+        }
+
         if (type == null && data.getType() != null) {
             EType newType = new EType();
             newType.setName(data.getType().substring(0, 1).toUpperCase() + data.getType().substring(1).toLowerCase());
@@ -523,7 +538,6 @@ public class EventPsqlJPA implements IStorageEvent {
         ev.setDescriptionEvent(data.getDescription());
         ev.setEventFormat(data.getFormat());
         ev.setEventType(type);
-        // ev.setImage(data.getImage());
         ev.setLinkDobroRF(data.getLinkDobroRF());
         ev.setMaxNumberParticipants(data.getMaxCountParticipants());
         ev.setNameEvent(data.getName());
@@ -620,11 +634,20 @@ public class EventPsqlJPA implements IStorageEvent {
                 entityManager.persist(points);
             }
 
-            if (ue.getUser().getCertificate() != null) {
-                ECertificate certificate = new ECertificate();
-                certificate.setFkUserID(user);
-                certificate.setImageURL(ue.getUser().getCertificate());
-                entityManager.persist(certificate);
+            List<ECertificate> certificate = entityManager
+                    .createQuery("SELECT p FROM ECertificate p WHERE p.fkUserID = :user AND p.fkEventID = :event",
+                            ECertificate.class)
+                    .setParameter("user", user)
+                    .setParameter("event", event)
+                    .getResultList();
+
+            if (certificate.isEmpty() && ue.getUser().getCertificate() != null) {
+                ECertificate newCertificate = new ECertificate();
+                newCertificate.setFkUserID(user);
+                newCertificate.setFkEventID(event);
+                newCertificate.setImageURL(ue.getUser().getCertificate());
+
+                entityManager.persist(newCertificate);
             }
 
             return "all completed";
@@ -633,6 +656,35 @@ public class EventPsqlJPA implements IStorageEvent {
                     .log(Level.WARNING, "Error saving participation info", e);
             throw new RuntimeException("Transaction failed", e);
         }
+    }
+
+    @Override
+    public List<Rating> ratingsGet(Integer eventID, Integer userID) {
+        EEvent event = entityManager.find(EEvent.class, eventID);
+        if (event == null) {
+            throw new EntityNotFoundException("Event not found");
+        }
+
+        EUser user = entityManager.find(EUser.class, userID);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        List<ECertificate> certificate = entityManager
+                    .createQuery("SELECT p FROM ECertificate p WHERE p.fkUserID = :user AND p.fkEventID = :event",
+                            ECertificate.class)
+                    .setParameter("user", user)
+                    .setParameter("event", event)
+                    .getResultList();
+        
+        List<Rating> achievementsList = new ArrayList<>();
+        for(ECertificate c : certificate) {
+            Rating achievements = new Rating();
+            achievements.setCertificate(c.getImageURL());
+            achievementsList.add(achievements);
+        }
+
+        return achievementsList;
     }
 
     @Override
@@ -650,9 +702,10 @@ public class EventPsqlJPA implements IStorageEvent {
 
         List<EEvent> events;
         String query = "SELECT p "
-                + "FROM EEvent p "
-                + "WHERE p.dateEvent < :end "
-                + "and p.dateEvent > :start";
+                + " FROM EEvent p "
+                + " WHERE p.dateEvent < :end "
+                + " and p.dateEvent > :start "
+                + " order by p.dateEvent desc ";
 
         Integer total = entityManager.createQuery(
                 query, EEvent.class)

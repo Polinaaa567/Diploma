@@ -13,6 +13,11 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.5</version>
+    </dependency>
     
     <dependency>
       <groupId>at.favre.lib</groupId>
@@ -31,13 +36,6 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.18.3</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -78,16 +76,7 @@
       <artifactId>hibernate-core-jakarta</artifactId>
       <version>5.6.15.Final</version>
     </dependency>
-<dependency>  
-    <groupId>me.saharnooby</groupId>  
-    <artifactId>qoi-java-awt</artifactId>  
-    <version>1.2.1</version>  
-</dependency>  
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <version>1.1.0.Final</version>
-    </dependency>
+
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
@@ -98,12 +87,6 @@
       <groupId>com.github.wslf</groupId>
       <artifactId>LevenshteinDistance</artifactId>
       <version>1.0.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-multipart</artifactId>
-      <version>2.24</version>
     </dependency>
 
   </dependencies>

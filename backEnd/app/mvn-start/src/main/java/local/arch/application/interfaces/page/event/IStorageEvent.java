@@ -4,6 +4,7 @@ import java.util.List;
 
 import local.arch.domain.entities.Pagination;
 import local.arch.domain.entities.page.Event;
+import local.arch.domain.entities.page.Rating;
 import local.arch.domain.entities.page.User;
 import local.arch.domain.entities.page.UserEvent;
 
@@ -39,4 +40,6 @@ public interface IStorageEvent {
     public Event findEvent(Integer eventID);
 
     public User findUser(Integer userID);
+
+    public List<Rating> ratingsGet(Integer eventID, Integer userID);
 }

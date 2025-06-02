@@ -54,7 +54,7 @@ public class Education {
                             .add("id", l.getLessonID())
                             .add("headline", l.getHeadline())
                             .add("link", l.getLink())
-                            .add("description", l.getDescription() != null ? l.getDescription() : "null")
+                            .add("description", l.getDescription() != null ? l.getDescription() : "")
                             .add("numberPoints", l.getNumberPoints())
                             .add("status", l.getStatus()));
                 });
@@ -66,7 +66,7 @@ public class Education {
                             .add("id", l.getLessonID())
                             .add("headline", l.getHeadline())
                             .add("link", l.getLink())
-                            .add("description", l.getDescription() != null ? l.getDescription() : "null"));
+                            .add("description", l.getDescription() != null ? l.getDescription() : ""));
                 });
 
                 return Response.ok(arrayBuilder.build()).build();
@@ -78,7 +78,7 @@ public class Education {
                     .add("headline", l.getHeadline())
                     .add("link", l.getLink())
                     .add("numberPoints", l.getNumberPoints())
-                    .add("description", l.getDescription() != null ? l.getDescription() : "null");
+                    .add("description", l.getDescription() != null ? l.getDescription() : "");
 
             return Response.ok(objBuilder.build()).build();
         }

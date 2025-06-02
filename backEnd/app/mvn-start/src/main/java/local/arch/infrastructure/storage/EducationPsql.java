@@ -16,7 +16,7 @@ import local.arch.infrastructure.storage.model.ELessons;
 import local.arch.infrastructure.storage.model.EPoints;
 import local.arch.infrastructure.storage.model.EUser;
 
-public class EducationPsqlJPA implements IStorageEducation {
+public class EducationPsql implements IStorageEducation {
 
     Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
 
@@ -83,7 +83,7 @@ public class EducationPsqlJPA implements IStorageEducation {
 
         try {
             ELessons lesson = entityManager.find(ELessons.class, lessonID);
-            
+
             if (lesson == null) {
                 l.setMessage("Урок не найден");
                 l.setStatus(false);
@@ -92,7 +92,7 @@ public class EducationPsqlJPA implements IStorageEducation {
             }
 
             EUser user = entityManager.find(EUser.class, userID);
-            
+
             if (user == null) {
                 l.setMessage("Пользователь не найден");
                 l.setStatus(false);
@@ -101,8 +101,8 @@ public class EducationPsqlJPA implements IStorageEducation {
             }
 
             EPoints points = new EPoints();
-            
-            points.setDateChange(new Timestamp(System.currentTimeMillis())); // Добавлено явное время
+
+            points.setDateChange(timestamp);
             points.setFkEventID(null);
             points.setFkLessonID(lesson);
             points.setPoints(lesson.getNumberPoints());
@@ -172,5 +172,24 @@ public class EducationPsqlJPA implements IStorageEducation {
         lesson.setNumberPoints(l.getNumberPoints());
 
         return lesson;
+    }
+
+    @Override
+    public List<Lesson> getUsersLessons(Integer userID) {
+        // EUser user = entityManager.find(EUser.class, userID);
+
+        // List<Object[]> listLessonsUsers = entityManager.createQuery(
+        //         "Select l.lessonID, l.headline, l.link, l.description, l.numberPoints from EPoints p left join ELessons l on p.fkLessonID = l where p.fkLessonID is not null and p.fkUserID = :user",
+        //         Object[].class).setParameter("user", user).getResultList();
+
+        // List<Lesson> lessonsList = new ArrayList<>();
+        // for(Object[] lesson : listLessonsUsers) {
+        //     Lesson l = new Lesson();
+        //     l.setLessonID((Integer) lesson[0]);
+        //     l.setHeadline((String) lesson[1]);
+        //     l.set((String) lesson[1]);
+        //     l.setDescription((String) lesson[3]);
+        // }
+        return null;
     }
 }

@@ -16,4 +16,6 @@ public interface IStorageEducation {
     public void changeLessonInfo(Integer lessonID, Lesson lesson);
 
     public Lesson receiveLessonInfo(Integer lessonID);
+    
+    public List<Lesson> getUsersLessons(Integer userID);
 }

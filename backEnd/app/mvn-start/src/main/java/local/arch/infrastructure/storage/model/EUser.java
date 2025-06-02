@@ -36,19 +36,19 @@ public class EUser {
 
     @Column(name = "\"patronymic\"")
     private String patronymic;
-    
+
     @Column(name = "\"login\"")
     private String login;
-    
+
     @Column(name = "\"password\"")
     private String password;
-    
+
     @Column(name = "\"clothing_size\"")
     private String clothingSize;
-    
+
     @Column(name = "\"age_stamp\"")
     private String ageStamp;
-    
+
     @OneToOne
     @JoinColumn(name = "\"fk_role_id\"", referencedColumnName = "\"id_role\"")
     private ERole fkRoleID;
@@ -63,4 +63,3 @@ public class EUser {
     @Column(name = "\"basis_education\"")
     private String basisEducation;
 }
-

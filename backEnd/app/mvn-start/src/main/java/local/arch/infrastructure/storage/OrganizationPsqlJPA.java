@@ -41,7 +41,6 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
         List<Efaq> results = entityManager.createQuery("select p from Efaq p", Efaq.class).getResultList();
 
         List<FAQData> faq = new ArrayList<>();
-        
         for (Efaq res : results) {
             FAQData f = new FAQData();
             f.setFaqID(res.getFaqID());
@@ -71,6 +70,9 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
 
     @Override
     public List<YearData> receiveReports() {
+        Calendar now = Calendar.getInstance();
+        int currentYear = now.get(Calendar.YEAR);
+        int currentMonth = now.get(Calendar.MONTH);
 
         List<EEvent> allEEvents = entityManager
                 .createQuery("select e from EEvent e where e.dateEvent < :now order by e.dateEvent desc",
@@ -86,6 +88,7 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
             event.setEventID(e.getEventID());
             event.setName(e.getNameEvent());
             event.setDescription(e.getDescriptionEvent());
+            event.setImageUrl(e.getImage());
             event.setDateC(e.getDateEvent());
 
             List<EUserEvent> ue = entityManager.createQuery(
@@ -109,6 +112,10 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
 
             Integer year = event.getDateC().get(Calendar.YEAR);
             Integer month = event.getDateC().get(Calendar.MONTH);
+
+            if (year == currentYear && month == currentMonth) {
+                continue;
+            }
 
             groupedEvents
                     .computeIfAbsent(year, k -> new HashMap<>())

@@ -167,6 +167,17 @@ public class UserPsqlJPA implements IStorageUser {
                         " order by point desc, u.lastName desc ",
                 Object[].class).setParameter("role", "Администратор").getResultList();
 
+        Object[] maxLevelData = entityManager.createQuery(
+                "SELECT l.level, l.maxPoints " +
+                        "FROM ELevel l " +
+                        "WHERE l.level = (SELECT MAX(le.level) FROM ELevel le)",
+                Object[].class)
+                .getResultStream()
+                .findFirst()
+                .orElse(new Object[] { 0, 0 });
+        Integer maxLevel = (Integer) maxLevelData[0];
+        Integer maxLevelPoints = (Integer) maxLevelData[1];
+
         List<Rating> ratingList = new ArrayList<>();
         for (Object[] res : results) {
             Integer level = entityManager.createQuery(
@@ -193,9 +204,14 @@ public class UserPsqlJPA implements IStorageUser {
             user.setName((String) res[3]);
 
             rating.setInfo(user);
+            if (((Long) res[1]).intValue() > maxLevelPoints) {
+                rating.setMaxPoint(maxLevelPoints);
+                rating.setLevel(maxLevel);
+            } else {
+                rating.setMaxPoint(maxPoint);
+                rating.setLevel(level);
+            }
             rating.setPoint(((Long) res[1]).intValue());
-            rating.setMaxPoint(maxPoint);
-            rating.setLevel(level);
 
             ratingList.add(rating);
         }
@@ -218,10 +234,10 @@ public class UserPsqlJPA implements IStorageUser {
     @Override
     public Rating receiveCertificate(Integer userID) {
         EUser user = entityManager.find(EUser.class, userID);
-
         if (user == null) {
             throw new EntityNotFoundException("User not found");
         }
+        Rating achievements = new Rating();
 
         List<ECertificate> resCertificate = entityManager
                 .createQuery("select p from ECertificate p where p.fkUserID = :user", ECertificate.class)
@@ -237,29 +253,45 @@ public class UserPsqlJPA implements IStorageUser {
                 .setParameter("user", user)
                 .getSingleResult();
 
-        Integer level = entityManager.createQuery(
-                " Select min(le.level) " +
-                        " From ELevel le " +
-                        " where :points <= le.maxPoints",
-                Integer.class)
-                .setParameter("points", totalPoints)
-                .getSingleResult();
+        Object[] maxLevelData = entityManager.createQuery(
+                "SELECT l.level, l.maxPoints " +
+                        "FROM ELevel l " +
+                        "WHERE l.level = (SELECT MAX(le.level) FROM ELevel le)",
+                Object[].class)
+                .getResultStream()
+                .findFirst()
+                .orElse(new Object[] { 0, 0 });
+        Integer maxLevel = (Integer) maxLevelData[0];
+        Integer maxLevelPoints = (Integer) maxLevelData[1];
 
-        Integer maxPoint = entityManager.createQuery(
-                " Select min(le.maxPoints) " +
-                        " From ELevel le " +
-                        " where :points <= le.maxPoints",
-                Integer.class)
-                .setParameter("points", totalPoints)
-                .getSingleResult();
+        if (totalPoints < maxLevelPoints) {
+            Integer level = entityManager.createQuery(
+                    " Select min(le.level) " +
+                            " From ELevel le " +
+                            " where :points <= le.maxPoints",
+                    Integer.class)
+                    .setParameter("points", totalPoints)
+                    .getSingleResult();
 
-        Rating achievements = new Rating();
+            Integer maxPoint = entityManager.createQuery(
+                    " Select min(le.maxPoints) " +
+                            " From ELevel le " +
+                            " where :points <= le.maxPoints",
+                    Integer.class)
+                    .setParameter("points", totalPoints)
+                    .getSingleResult();
+
+            achievements.setLevel(level);
+            achievements.setMaxPoint(maxPoint);
+        } else {
+            achievements.setLevel(maxLevel);
+            achievements.setMaxPoint(maxLevelPoints);
+        }
+
         achievements.setCertificates(
                 resCertificate.stream()
                         .map(ECertificate::getImageURL)
                         .collect(Collectors.toList()));
-        achievements.setLevel(level != null ? level : 0);
-        achievements.setMaxPoint(maxPoint != null ? maxPoint : 0);
         achievements.setPoint(totalPoints.intValue());
 
         return achievements;

@@ -9,17 +9,15 @@ import java.util.logging.Logger;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+
 import local.arch.application.interfaces.config.IFileConfig;
 import local.arch.application.interfaces.page.news.IStorageNews;
 import local.arch.domain.entities.page.News;
-import local.arch.infrastructure.storage.model.EEvent;
 import local.arch.infrastructure.storage.model.EImageNews;
 import local.arch.infrastructure.storage.model.ENews;
-import local.arch.infrastructure.storage.model.EUserEvent;
 
 public class NewsPsqlJPA implements IStorageNews {
 
@@ -34,45 +32,47 @@ public class NewsPsqlJPA implements IStorageNews {
     @Override
     @Transactional
     public void addNews(News news) {
-
         ENews n = new ENews();
         n.setDateCreation(calendar);
         n.setDescriptionNews(news.getDescription());
         n.setHeadlineNews(news.getHeadline());
-
         entityManager.persist(n);
 
-        EImageNews newsImage = new EImageNews();
-        newsImage.setImage(news.getImageUrl());
-        newsImage.setNews(n);
-
-        entityManager.persist(newsImage);
+        if (news.getImageUrl() != null && !news.getImageUrl().isBlank()) {
+            EImageNews newsImage = new EImageNews();
+            newsImage.setImage(news.getImageUrl());
+            newsImage.setNews(n);
+            entityManager.persist(newsImage);
+        }
     }
 
     @Override
     @Transactional
     public void deleteNews(Integer newsID) {
-
         ENews news = entityManager.find(ENews.class, newsID);
+        if (news == null)
+            return;
 
-        EImageNews imageNews = null;
+        List<EImageNews> imageNews = null;
+
         try {
             imageNews = entityManager.createQuery("Select p from EImageNews p where p.news = :news", EImageNews.class)
-                    .setParameter("news", news).getSingleResult();
+                    .setParameter("news", news).getResultList();
         } catch (NoResultException e) {
         }
 
-        if (imageNews != null) {
-            if (imageNews.getImage() != null) {
+        if (imageNews.isEmpty()) {
+            for (EImageNews image : imageNews) {
                 try {
-                    fileConfig.deleteImage(imageNews.getImage());
+                    fileConfig.deleteImage(image.getImage());
                 } catch (IOException e) {
                     Logger.getLogger(getClass().getName())
-                            .log(Level.SEVERE, "Ошибка удаления файла: " + imageNews.getImage(), e);
+                            .log(Level.SEVERE, "Ошибка удаления файла: " + image.getImage(), e);
                     throw new RuntimeException("Ошибка удаления файла", e);
                 }
+
+                entityManager.remove(image);
             }
-            entityManager.remove(imageNews);
         }
 
         entityManager.remove(news);
@@ -82,6 +82,26 @@ public class NewsPsqlJPA implements IStorageNews {
     @Transactional
     public void changeNewsInfo(Integer newsID, News news) {
         ENews n = entityManager.find(ENews.class, newsID);
+
+        List<EImageNews> imageNews = entityManager
+                .createQuery("Select p from EImageNews p where p.fkEventID = :news", EImageNews.class)
+                .setParameter("news", n).getResultList();
+
+        if (news.getImage() != null && !news.getImage().isBlank() && !news.getImage().contains("news")) {
+            for (EImageNews image : imageNews) {
+                try {
+                    String imageUrl = fileConfig.saveImageFromBase64(news.getImage(), "news/1");
+                    fileConfig.deleteImage(image.getImage());
+
+                    image.setImage(imageUrl);
+
+                    entityManager.persist(image);
+                } catch (IOException e) {
+                    Logger.getLogger(getClass().getName())
+                            .log(Level.WARNING, "Ошибка удаления файла: " + image.getImage(), e);
+                }
+            }
+        }
 
         n.setHeadlineNews(news.getHeadline());
         n.setDescriptionNews(news.getDescription());
@@ -105,7 +125,7 @@ public class NewsPsqlJPA implements IStorageNews {
             n.setNewsID(res.getNewsID());
             n.setHeadline(res.getHeadlineNews());
             n.setDateCreation(res.getDateCreation());
-           
+
             if (imageNews.isEmpty()) {
                 n.setImageUrl(null);
             } else {
@@ -130,9 +150,9 @@ public class NewsPsqlJPA implements IStorageNews {
         n.setHeadline(news.getHeadlineNews());
         n.setDescription(news.getDescriptionNews());
         n.setDateCreation(news.getDateCreation());
+
         if (imageNews.isEmpty()) {
             n.setImageUrl(null);
-
         } else {
             n.setImageUrl(imageNews.get(0).getImage());
 
