@@ -243,28 +243,35 @@ public class EventPsqlJPA implements IStorageEvent {
 
         if (userEvent.getUserID() != null && events.getDateEvent().compareTo(calendar) > 0) {
             EUser user = entityManager.find(EUser.class, userEvent.getUserID());
+            if (user.getClothingSize() != null
+                    && user.getFirstName() != null
+                    && user.getLastName() != null
+                    && user.getAgeStamp() != null) {
 
-            if (user.getAgeStamp().equals("16-17") && events.getAgeRestrictions() == 18) {
-                event.setStatusParticipate(true);
-            } else {
-                Boolean existEventUser = entityManager.createQuery(
-                        "SELECT p "
-                                + "FROM EUserEvent p "
-                                + "where p.fkEventID = :idE and p.fkUserID = :idU ",
-                        EUserEvent.class)
-                        .setParameter("idE", events).setParameter("idU", user).getResultList().isEmpty()
-                                ? false
-                                : true;
+                if (user.getAgeStamp().equals("16-17") && events.getAgeRestrictions() == 18) {
+                    event.setStatusParticipate(true);
+                } else {
+                    Boolean existEventUser = entityManager.createQuery(
+                            "SELECT p "
+                                    + "FROM EUserEvent p "
+                                    + "where p.fkEventID = :idE and p.fkUserID = :idU ",
+                            EUserEvent.class)
+                            .setParameter("idE", events).setParameter("idU", user).getResultList().isEmpty()
+                                    ? false
+                                    : true;
 
-                if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
-                    if (events.getMaxNumberParticipants() - count <= 0) {
-                        event.setStatusParticipate(true);
+                    if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
+                        if (events.getMaxNumberParticipants() - count <= 0) {
+                            event.setStatusParticipate(true);
+                        } else {
+                            event.setStatusParticipate(existEventUser);
+                        }
                     } else {
                         event.setStatusParticipate(existEventUser);
                     }
-                } else {
-                    event.setStatusParticipate(existEventUser);
                 }
+            } else {
+                event.setStatusParticipate(true);
             }
         } else {
             event.setStatusParticipate(true);
@@ -671,14 +678,14 @@ public class EventPsqlJPA implements IStorageEvent {
         }
 
         List<ECertificate> certificate = entityManager
-                    .createQuery("SELECT p FROM ECertificate p WHERE p.fkUserID = :user AND p.fkEventID = :event",
-                            ECertificate.class)
-                    .setParameter("user", user)
-                    .setParameter("event", event)
-                    .getResultList();
-        
+                .createQuery("SELECT p FROM ECertificate p WHERE p.fkUserID = :user AND p.fkEventID = :event",
+                        ECertificate.class)
+                .setParameter("user", user)
+                .setParameter("event", event)
+                .getResultList();
+
         List<Rating> achievementsList = new ArrayList<>();
-        for(ECertificate c : certificate) {
+        for (ECertificate c : certificate) {
             Rating achievements = new Rating();
             achievements.setCertificate(c.getImageURL());
             achievementsList.add(achievements);

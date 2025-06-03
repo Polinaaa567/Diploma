@@ -82,7 +82,9 @@ public class EventsService implements IEventsService, IStorageEventUsing, IUseFi
 
             String imagePath;
             
-            if(ue.getStampParticipate() && res.isEmpty()) {
+            // if(ue.getStampParticipate() && res.isEmpty()) {
+            if(ue.getStampParticipate()) {
+
                 ITextToImage modifiedImage = Factory.createTextToImage();
                 
                 BufferedImage image = modifiedImage.addTextToImage(template, event.getName(), user);

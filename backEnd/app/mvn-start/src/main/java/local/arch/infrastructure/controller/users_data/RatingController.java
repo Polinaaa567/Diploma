@@ -31,6 +31,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 import local.arch.application.interfaces.page.user.IUserService;
+import local.arch.domain.entities.page.Event;
 import local.arch.domain.entities.page.Rating;
 import local.arch.infrastructure.builder.user_annotation.BuiltUser;
 import local.arch.infrastructure.token.ITokenKey;
@@ -102,14 +103,14 @@ public class RatingController {
 
         Double percent = ((double) achievements.getPoint() / (double) achievements.getMaxPoint()) * 100;
         Double roundedNumber = Math.round(percent * 100.0) / 100.0;
-
+                
+        achievements.getCertificates().forEach(arrayBuilder::add);
         JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                 .add("points", achievements.getPoint())
                 .add("level", achievements.getLevel())
                 .add("maxPoint", achievements.getMaxPoint() != null ? achievements.getMaxPoint() : 0)
                 .add("percent", roundedNumber)
-                .add("certificate",
-                        Optional.ofNullable(achievements.getCertificates().isEmpty() ? "" : achievements.getCertificates()).map(Object::toString).orElse(""));
+                .add("certificates", arrayBuilder);
 
         // достижения пользователя
 

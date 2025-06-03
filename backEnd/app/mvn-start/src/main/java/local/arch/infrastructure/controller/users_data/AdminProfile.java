@@ -34,7 +34,7 @@ public class AdminProfile {
     @BuiltUser
     IUserService userService;
 
-    JsonArrayBuilder lessonsArrayBuilder = Json.createArrayBuilder();
+    JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
 
     @GET
     @Path("/{userID}")
@@ -62,6 +62,7 @@ public class AdminProfile {
 
             Double percent = ((double) achievements.getPoint() / (double) achievements.getMaxPoint()) * 100;
             Double roundedNumber = Math.round(percent * 100.0) / 100.0;
+         achievements.getCertificates().forEach(arrayBuilder::add);
 
             JsonObjectBuilder objBuilder = Json.createObjectBuilder()
                     .add("lastName", user.getLastName() != null ? user.getLastName() : "")
@@ -75,9 +76,11 @@ public class AdminProfile {
                     .add("level", achievements.getLevel())
                     .add("maxPoint", achievements.getMaxPoint())
                     .add("percent", roundedNumber)
-                    .add("certificate",
-                            Optional.ofNullable(achievements.getCertificates().isEmpty() ? "" : achievements.getCertificates()).map(Object::toString).orElse(""));
-            return Response.ok(objBuilder.build()).build();
+                    .add("certificates", arrayBuilder);
+            if (achievements.getCertificates().isEmpty()) {
+                
+            }
+                    return Response.ok(objBuilder.build()).build();
 
         } else {
             return Response.ok(buildErrorMessage("Ошибка при нахождении пользователя", false).build()).build();

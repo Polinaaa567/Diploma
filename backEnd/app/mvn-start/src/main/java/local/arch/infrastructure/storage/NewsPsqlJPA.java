@@ -53,26 +53,25 @@ public class NewsPsqlJPA implements IStorageNews {
         if (news == null)
             return;
 
-        List<EImageNews> imageNews = null;
-
         try {
-            imageNews = entityManager.createQuery("Select p from EImageNews p where p.news = :news", EImageNews.class)
+            List<EImageNews> imageNews = entityManager
+                    .createQuery("Select p from EImageNews p where p.news = :news", EImageNews.class)
                     .setParameter("news", news).getResultList();
-        } catch (NoResultException e) {
-        }
 
-        if (imageNews.isEmpty()) {
-            for (EImageNews image : imageNews) {
-                try {
-                    fileConfig.deleteImage(image.getImage());
-                } catch (IOException e) {
-                    Logger.getLogger(getClass().getName())
-                            .log(Level.SEVERE, "Ошибка удаления файла: " + image.getImage(), e);
-                    throw new RuntimeException("Ошибка удаления файла", e);
+            if (!imageNews.isEmpty()) {
+                for (EImageNews image : imageNews) {
+                    try {
+                        fileConfig.deleteImage(image.getImage());
+                    } catch (IOException e) {
+                        Logger.getLogger(getClass().getName())
+                                .log(Level.SEVERE, "Ошибка удаления файла: " + image.getImage(), e);
+                        throw new RuntimeException("Ошибка удаления файла", e);
+                    }
+
+                    entityManager.remove(image);
                 }
-
-                entityManager.remove(image);
             }
+        } catch (NoResultException e) {
         }
 
         entityManager.remove(news);
@@ -83,24 +82,29 @@ public class NewsPsqlJPA implements IStorageNews {
     public void changeNewsInfo(Integer newsID, News news) {
         ENews n = entityManager.find(ENews.class, newsID);
 
-        List<EImageNews> imageNews = entityManager
-                .createQuery("Select p from EImageNews p where p.fkEventID = :news", EImageNews.class)
-                .setParameter("news", n).getResultList();
-
         if (news.getImage() != null && !news.getImage().isBlank() && !news.getImage().contains("news")) {
-            for (EImageNews image : imageNews) {
-                try {
-                    String imageUrl = fileConfig.saveImageFromBase64(news.getImage(), "news/1");
-                    fileConfig.deleteImage(image.getImage());
-
-                    image.setImage(imageUrl);
-
-                    entityManager.persist(image);
-                } catch (IOException e) {
-                    Logger.getLogger(getClass().getName())
-                            .log(Level.WARNING, "Ошибка удаления файла: " + image.getImage(), e);
+            try {
+                List<EImageNews> imageNews = entityManager
+                        .createQuery("Select p from EImageNews p where p.news = :news", EImageNews.class)
+                        .setParameter("news", n).getResultList();
+                if (!imageNews.isEmpty()) {
+                    for (EImageNews image : imageNews) {
+                        fileConfig.deleteImage(image.getImage());
+                        entityManager.remove(image);
+                    }
                 }
+                String imageUrl = fileConfig.saveImageFromBase64(news.getImage(), "news/1");
+                EImageNews news2 = new EImageNews();
+
+                news2.setImage(imageUrl);
+                news2.setNews(n);
+                entityManager.persist(news2);
+
+            } catch (IOException e) {
+                Logger.getLogger(getClass().getName())
+                        .log(Level.WARNING, "Ошибка удаления файла: " + news.getImage(), e);
             }
+
         }
 
         n.setHeadlineNews(news.getHeadline());
@@ -155,8 +159,8 @@ public class NewsPsqlJPA implements IStorageNews {
             n.setImageUrl(null);
         } else {
             n.setImageUrl(imageNews.get(0).getImage());
-
         }
+        
         return n;
     }
 }

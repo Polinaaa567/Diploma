@@ -13,7 +13,15 @@ public class Lesson {
     @NotBlank(message = "Ссылка не должна быть пустой")
     private String link;
    
-    private Integer numberPoints; 
+    private Integer numberPoints = 50;
+
+    public void setPoints(Integer numberPoints) {
+        if (numberPoints == null) {
+            this.numberPoints = 50;
+        } else {
+            this.numberPoints = numberPoints;
+        }
+    }; 
 
     private Boolean status;
 

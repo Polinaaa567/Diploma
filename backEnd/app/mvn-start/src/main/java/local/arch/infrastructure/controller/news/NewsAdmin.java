@@ -147,6 +147,7 @@ public class NewsAdmin {
                         .entity(buildErrorMessage("Недостаточно прав", false).build())
                         .build();
             }
+            
             if (newsID != null) {
                 newsService.deleteNews(newsID);
 
