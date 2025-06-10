@@ -77,8 +77,8 @@ public class ReportAdmin {
                                                         .add("description", e.getDescription())
                                                         .add("date", formatDate(e.getDateC()))
                                                         .add("usersNumber", e.getNumberParticipants())
-                                                        .add("image", Optional.ofNullable(e.getImageUrl()).orElse(""));
-
+                                                        .add("image", Optional.ofNullable(e.getImageUrl()).orElse(""))
+                                                        .add("countParticipants", e.getNumberParticipants());
                                         eventArrayBuilder.add(objBuilder);
                                 }
                                 JsonObjectBuilder objBuilder = Json.createObjectBuilder()

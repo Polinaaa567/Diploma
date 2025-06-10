@@ -240,7 +240,7 @@ public class UserPsqlJPA implements IStorageUser {
         Rating achievements = new Rating();
 
         List<ECertificate> resCertificate = entityManager
-                .createQuery("select p from ECertificate p where p.fkUserID = :user", ECertificate.class)
+                .createQuery("select p from ECertificate p where p.fkUserID = :user order by p.certificateID DESC", ECertificate.class)
                 .setParameter("user", user).getResultList();
 
         Long totalPoints = entityManager.createQuery(

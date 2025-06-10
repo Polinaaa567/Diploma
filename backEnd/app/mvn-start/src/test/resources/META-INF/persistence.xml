@@ -1,0 +1,25 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             version="2.1">
+    <persistence-unit name="TestVolunteering" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
+        <class>local.arch.infrastructure.storage.model.ERole</class> 
+        <class>local.arch.infrastructure.storage.model.EUser</class>
+        <class>local.arch.infrastructure.storage.model.ELessons</class>
+        <class>local.arch.infrastructure.storage.model.EPoints</class>
+        <class>local.arch.infrastructure.storage.model.EEvent</class>
+        <class>local.arch.infrastructure.storage.model.EType</class>
+        <class>local.arch.infrastructure.storage.model.Efaq</class>
+        <properties>
+            <property name="javax.persistence.jdbc.url" 
+                      value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"/>
+            <property name="javax.persistence.jdbc.driver" 
+                      value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="postgres"/>
+            <property name="javax.persistence.jdbc.password" value="qwerty"/>
+            <property name="hibernate.dialect" 
+                      value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+        </properties>
+    </persistence-unit>
+</persistence>

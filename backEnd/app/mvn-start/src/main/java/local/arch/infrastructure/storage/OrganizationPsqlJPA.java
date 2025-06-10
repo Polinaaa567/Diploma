@@ -79,6 +79,7 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
                         EEvent.class)
                 .setParameter("now", timestamp).getResultList();
 
+        
         Map<Integer, Map<Integer, List<Event>>> groupedEvents = new HashMap<>();
 
         List<Event> allEvents = new ArrayList<>();
@@ -90,6 +91,7 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
             event.setDescription(e.getDescriptionEvent());
             event.setImageUrl(e.getImage());
             event.setDateC(e.getDateEvent());
+            
 
             List<EUserEvent> ue = entityManager.createQuery(
                     "SELECT p "
@@ -149,7 +151,6 @@ public class OrganizationPsqlJPA implements IStorageOrganization {
             result.add(yearData);
             Logger.getLogger("Проверка вывода yearData.getMonth(): " + yearData.getMonth())
                     .info("what happend yearData.getMonth() = " + yearData.getMonth());
-
         }
 
         result.sort((y1, y2) -> y2.getYear() - y1.getYear());

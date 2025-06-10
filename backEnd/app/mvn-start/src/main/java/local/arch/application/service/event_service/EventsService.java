@@ -82,8 +82,7 @@ public class EventsService implements IEventsService, IStorageEventUsing, IUseFi
 
             String imagePath;
             
-            // if(ue.getStampParticipate() && res.isEmpty()) {
-            if(ue.getStampParticipate()) {
+            if(ue.getStampParticipate() && res.isEmpty()) {
 
                 ITextToImage modifiedImage = Factory.createTextToImage();
                 

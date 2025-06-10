@@ -309,39 +309,54 @@ public class EventPsqlJPA implements IStorageEvent {
                     && user.getFirstName() != null
                     && user.getLastName() != null
                     && user.getAgeStamp() != null) {
+                if (user.getAgeStamp().equals("16-17") && events.getAgeRestrictions() == 18) {
+                    ue.setStatus(false);
+                    ue.setMsg("Возрастное ограничение");
+                    
+                    return ue;
+                } else {
+                    LocalDateTime localDateTime = LocalDateTime.now();
+                    Timestamp timestamp = Timestamp.valueOf(localDateTime);
 
-                LocalDateTime localDateTime = LocalDateTime.now();
-                Timestamp timestamp = Timestamp.valueOf(localDateTime);
+                    EUserEvent eu = new EUserEvent();
+                    eu.setFkEventID(events);
+                    eu.setFkUserID(user);
+                    eu.setDateCreation(timestamp);
 
-                EUserEvent eu = new EUserEvent();
-                eu.setFkEventID(events);
-                eu.setFkUserID(user);
-                eu.setDateCreation(timestamp);
+                    Integer count = entityManager.createQuery(
+                            "SELECT p "
+                                    + "FROM EUserEvent p "
+                                    + "where p.fkEventID = :id",
+                            EUserEvent.class)
+                            .setParameter("id", events)
+                            .getResultList().size();
 
-                Integer count = entityManager.createQuery(
-                        "SELECT p "
-                                + "FROM EUserEvent p "
-                                + "where p.fkEventID = :id",
-                        EUserEvent.class)
-                        .setParameter("id", events)
-                        .getResultList().size();
+                    List<EUserEvent> existingEUserEvent = entityManager.createQuery(
+                            "SELECT p "
+                                    + "FROM EUserEvent p "
+                                    + "where p.fkEventID = :idE and p.fkUserID = :idU",
+                            EUserEvent.class)
+                            .setParameter("idE", events)
+                            .setParameter("idU", user)
+                            .getResultList();
 
-                List<EUserEvent> existingEUserEvent = entityManager.createQuery(
-                        "SELECT p "
-                                + "FROM EUserEvent p "
-                                + "where p.fkEventID = :idE and p.fkUserID = :idU",
-                        EUserEvent.class)
-                        .setParameter("idE", events)
-                        .setParameter("idU", user)
-                        .getResultList();
+                    if (existingEUserEvent.isEmpty()) {
+                        if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
+                            if (events.getMaxNumberParticipants() - count <= 0) {
+                                ue.setCountParticipants(count);
+                                ue.setStatus(false);
+                                ue.setMsg("Кол-во мест на мероприятие закончилось");
+                                return ue;
+                            } else {
 
-                if (existingEUserEvent.isEmpty()) {
-                    if (events.getMaxNumberParticipants() != null && events.getMaxNumberParticipants() != 0) {
-                        if (events.getMaxNumberParticipants() - count <= 0) {
-                            ue.setCountParticipants(count);
-                            ue.setStatus(false);
-                            ue.setMsg("Кол-во мест на мероприятие закончилось");
-                            return ue;
+                                entityManager.persist(eu);
+
+                                ue.setCountParticipants(count + 1);
+                                ue.setStatus(true);
+                                ue.setMsg("Успешная регистрация на мероприятие");
+
+                                return ue;
+                            }
                         } else {
 
                             entityManager.persist(eu);
@@ -353,23 +368,13 @@ public class EventPsqlJPA implements IStorageEvent {
                             return ue;
                         }
                     } else {
-
-                        entityManager.persist(eu);
-
-                        ue.setCountParticipants(count + 1);
+                        ue.setCountParticipants(count);
                         ue.setStatus(true);
-                        ue.setMsg("Успешная регистрация на мероприятие");
+                        ue.setMsg("Вы уже записаны на мероприятие");
 
                         return ue;
                     }
-                } else {
-                    ue.setCountParticipants(count);
-                    ue.setStatus(true);
-                    ue.setMsg("Вы уже записаны на мероприятие");
-
-                    return ue;
                 }
-
             } else {
                 ue.setStatus(false);
                 ue.setMsg("Не все данные о пользователе заполнены");
