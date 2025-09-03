@@ -59,6 +59,7 @@ Bcrypt - это библиотека для хэширования. Она по�
 
 <h2 align="center">Тестирование</h2>
 Для проверки и тестирования сервера использовались десктопное приложение Postman и веб-сайт для проверки API «Online API Tester». 
+
 <img width="653" height="322" alt="image" src="https://github.com/user-attachments/assets/cce24448-2ea0-482b-9033-39b808bb29c6" />
 <img width="724" height="327" alt="image" src="https://github.com/user-attachments/assets/a0fea69d-5c21-4c7c-9be5-e4a860ed0e9b" />
 
